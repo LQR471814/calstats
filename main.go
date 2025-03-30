@@ -1,17 +1,21 @@
 package main
 
 import (
+	"calendar-summary/api/v1/v1connect"
 	"calendar-summary/internal/calendar"
 	"context"
 	"flag"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"slices"
 	"time"
 
 	"github.com/titanous/json5"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 type ServerConfig struct {
@@ -82,6 +86,8 @@ func printCal(ctx context.Context, source calendar.Source, calendarName string) 
 
 func main() {
 	cfgPath := flag.String("config", "config.json5", "Configuration path.")
+	port := flag.Int("port", 8003, "The port to host on.")
+	debug := flag.Bool("debug", false, "Print the contents of the configured calendar and exit.")
 	flag.Parse()
 
 	cfg, err := readConfig(*cfgPath)
@@ -101,8 +107,31 @@ func main() {
 		fatalerr("create caldav source", "err", err)
 	}
 
-	err = printCal(ctx, source, cfg.CalendarName)
-	if err != nil {
-		fatalerr("print calendar", "err", err)
+	if *debug {
+		err = printCal(ctx, source, cfg.CalendarName)
+		if err != nil {
+			fatalerr("print calendar", "err", err)
+		}
+		return
 	}
+
+	slog.Info("listening to gRPC...", "port", port)
+
+	mux := http.NewServeMux()
+	mux.Handle(v1connect.NewCalendarServiceHandler(CalendarService{
+		calendarName: cfg.CalendarName,
+		source:       source,
+	}))
+	server := &http.Server{
+		Addr:    fmt.Sprintf(":%d", port),
+		Handler: h2c.NewHandler(mux, &http2.Server{}),
+	}
+	go func() {
+		err := server.ListenAndServe()
+		if err != nil {
+			fatalerr("listen server", "err", err)
+		}
+	}()
+
+	<-ctx.Done()
 }

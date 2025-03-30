@@ -1,0 +1,10 @@
+version: v2
+plugins:
+  - remote: buf.build/bufbuild/es:v1.7.2
+    out: api
+    opt: target=ts
+  - remote: buf.build/connectrpc/es:v1.4.0
+    out: api
+    opt: target=ts
+inputs:
+  - directory: api
