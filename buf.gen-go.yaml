@@ -5,10 +5,10 @@ managed:
     - file_option: go_package_prefix
       value: calendar-summary/api
 plugins:
-  - remote: buf.build/protocolbuffers/go:v1.34.2
+  - remote: buf.build/protocolbuffers/go:v1.36.6
     out: api
     opt: paths=source_relative
-  - remote: buf.build/connectrpc/go:v1.16.2
+  - remote: buf.build/connectrpc/go:v1.18.1
     out: api
     opt: paths=source_relative
 inputs:

@@ -1,9 +1,9 @@
 version: v2
 plugins:
-  - remote: buf.build/bufbuild/es:v1.7.2
+  - remote: buf.build/bufbuild/es:v2.2.5
     out: api
     opt: target=ts
-  - remote: buf.build/connectrpc/es:v1.4.0
+  - remote: buf.build/connectrpc/query-es:v2.0.1
     out: api
     opt: target=ts
 inputs:

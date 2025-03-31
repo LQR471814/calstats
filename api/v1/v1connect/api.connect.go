@@ -37,12 +37,6 @@ const (
 	CalendarServiceEventsProcedure = "/CalendarService/Events"
 )
 
-// These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
-var (
-	calendarServiceServiceDescriptor      = v1.File_v1_api_proto.Services().ByName("CalendarService")
-	calendarServiceEventsMethodDescriptor = calendarServiceServiceDescriptor.Methods().ByName("Events")
-)
-
 // CalendarServiceClient is a client for the CalendarService service.
 type CalendarServiceClient interface {
 	Events(context.Context, *connect.Request[v1.EventsRequest]) (*connect.Response[v1.EventsResponse], error)
@@ -57,11 +51,12 @@ type CalendarServiceClient interface {
 // http://api.acme.com or https://acme.com/grpc).
 func NewCalendarServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) CalendarServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	calendarServiceMethods := v1.File_v1_api_proto.Services().ByName("CalendarService").Methods()
 	return &calendarServiceClient{
 		events: connect.NewClient[v1.EventsRequest, v1.EventsResponse](
 			httpClient,
 			baseURL+CalendarServiceEventsProcedure,
-			connect.WithSchema(calendarServiceEventsMethodDescriptor),
+			connect.WithSchema(calendarServiceMethods.ByName("Events")),
 			connect.WithClientOptions(opts...),
 		),
 	}
@@ -88,10 +83,11 @@ type CalendarServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewCalendarServiceHandler(svc CalendarServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	calendarServiceMethods := v1.File_v1_api_proto.Services().ByName("CalendarService").Methods()
 	calendarServiceEventsHandler := connect.NewUnaryHandler(
 		CalendarServiceEventsProcedure,
 		svc.Events,
-		connect.WithSchema(calendarServiceEventsMethodDescriptor),
+		connect.WithSchema(calendarServiceMethods.ByName("Events")),
 		connect.WithHandlerOptions(opts...),
 	)
 	return "/CalendarService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
