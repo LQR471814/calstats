@@ -12,6 +12,16 @@ type Event struct {
 	Duration   time.Duration
 }
 
+func NewEvent(name string, start, end time.Time, tags []string) Event {
+	return Event{
+		Name:     name,
+		Start:    start,
+		End:      end,
+		Tags:     tags,
+		Duration: end.Sub(start),
+	}
+}
+
 type Calendar struct {
 	Id   string
 	Name string

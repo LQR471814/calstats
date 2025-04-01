@@ -3,10 +3,10 @@ package main
 import (
 	"calendar-summary/api/v1/v1connect"
 	"calendar-summary/internal/calendar"
+	"calendar-summary/internal/tel"
 	"context"
 	"flag"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -44,7 +44,7 @@ func readConfig(path string) (Config, error) {
 }
 
 func fatalerr(msg string, args ...any) {
-	slog.Error(msg, args...)
+	tel.Log.Error("main", msg, args...)
 	os.Exit(1)
 }
 
@@ -73,7 +73,8 @@ func printCal(ctx context.Context, source calendar.Source, calendarName string) 
 	})
 
 	for _, e := range events {
-		slog.Info(
+		tel.Log.Info(
+			"main",
 			"EVENT",
 			"name", e.Name,
 			"start", e.Start.Format(time.RFC1123),
@@ -115,7 +116,7 @@ func main() {
 		return
 	}
 
-	slog.Info("listening to gRPC...", "port", port)
+	tel.Log.Info("main", "listening to gRPC...", "port", port)
 
 	mux := http.NewServeMux()
 	mux.Handle(v1connect.NewCalendarServiceHandler(CalendarService{
