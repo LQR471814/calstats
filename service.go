@@ -4,6 +4,7 @@ import (
 	v1 "calendar-summary/api/v1"
 	"calendar-summary/internal/calendar"
 	"context"
+	"encoding/json"
 	"fmt"
 	"slices"
 	"time"
@@ -92,10 +93,10 @@ var max_time = time.Date(9999, 12, 31, 23, 59, 59, 999999999, time.UTC)
 // }
 
 type eventPoint struct {
-	// true for isStart, false for end
-	isStart bool
-	point   time.Time
-	ref     *calendar.Event
+	// true for IsStart, false for end
+	IsStart bool
+	Point   time.Time
+	Ref     *calendar.Event
 }
 
 func pinEventPoints(events []calendar.Event) []eventPoint {
@@ -103,22 +104,35 @@ func pinEventPoints(events []calendar.Event) []eventPoint {
 	points := make([]eventPoint, 0, len(events)*2)
 	for i, e := range events {
 		points = append(points, eventPoint{
-			isStart: true,
-			point:   e.Start,
-			ref:     &events[i], // reference the element in the array, do not allocate new memory
+			IsStart: true,
+			Point:   e.Start,
+			Ref:     &events[i], // reference the element in the array, do not allocate new memory
 		})
 		points = append(points, eventPoint{
-			isStart: false,
-			point:   e.End,
-			ref:     &events[i],
+			IsStart: false,
+			Point:   e.End,
+			Ref:     &events[i],
 		})
 	}
 	// sort points ascending according to time, this creates a list of time points
 	// that shows how events go in and out chronologically
 	slices.SortFunc(points, func(a, b eventPoint) int {
-		return a.point.Compare(b.point)
+		diff := a.Point.Compare(b.Point)
+		if diff != 0 {
+			return diff
+		}
+		// events with the same start time will be sorted from longest to shortest
+		return -int(a.Ref.Duration - b.Ref.Duration)
 	})
 	return points
+}
+
+func prettyPrint(value any) string {
+	expected, err := json.MarshalIndent(value, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	return string(expected)
 }
 
 func LayerEvents(events []calendar.Event) []calendar.Event {
@@ -126,34 +140,45 @@ func LayerEvents(events []calendar.Event) []calendar.Event {
 		return nil
 	}
 
-	var output []calendar.Event
-
 	points := pinEventPoints(events)
-	cur := points[0]
-	for i := 1; i < len(events); i++ {
-		next := points[i]
+	fmt.Println(prettyPrint(points))
 
-		// if ending of current
-		if !next.isStart && next.ref == cur.ref {
-			output = append(output, *cur.ref)
+	var output []calendar.Event
+	var queue []eventPoint
+	for _, next := range points {
+		if len(queue) == 0 {
+			queue = append(queue, next)
+			continue
+		}
+		cur := queue[len(queue)-1]
+
+		// is ending of some event
+		if !next.IsStart {
+			for i, pin := range queue {
+				if pin.Ref == next.Ref {
+					queue = slices.Delete(queue, i, i+1)
+					break
+				}
+			}
+			if next.Ref == cur.Ref {
+				output = append(output, *cur.Ref)
+			}
+			continue
 		}
 
-		// if start of different event (while current hasn't ended)
-		// because of the way the events are sorted, we can be assured
-		//
-		// that this different event is on a higher "layer" than our current
-		// event. that is, events with a greater start time are always on higher
-		// layers and events with a
-		if next.isStart && next.ref != cur.ref {
+		// if beginning some event, add the sliver of the
+		// current event that is not covered by the next
+		// event yet
+		if next.Point.After(cur.Point) {
 			output = append(output, calendar.NewEvent(
-				cur.ref.Name,
-				cur.ref.Start,
-				next.ref.Start,
-				cur.ref.Tags,
+				cur.Ref.Name,
+				cur.Point,
+				next.Point,
+				cur.Ref.Tags,
 			))
 		}
 
-		cur = next
+		queue = append(queue, next)
 	}
 
 	return output

@@ -2,7 +2,6 @@ package main
 
 import (
 	"calendar-summary/internal/calendar"
-	"encoding/json"
 	"testing"
 	"time"
 )
@@ -11,14 +10,6 @@ func equalEvents(a, b calendar.Event) bool {
 	return a.Name == b.Name &&
 		a.Start.Equal(b.Start) &&
 		a.End.Equal(b.End)
-}
-
-func prettyPrint(value any) string {
-	expected, err := json.MarshalIndent(value, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-	return string(expected)
 }
 
 func TestLayerEvents(t *testing.T) {
@@ -58,6 +49,7 @@ func TestLayerEvents(t *testing.T) {
 		}
 		for i := range test.expect {
 			if !equalEvents(test.expect[i], result[i]) {
+				t.Log(prettyPrint(result))
 				t.Fatalf(
 					"events are not equal\n\nInput: %s\n\nExpected: %s\n\nResult: %s",
 					prettyPrint(test.input),
