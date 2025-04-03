@@ -9,16 +9,18 @@ type Event struct {
 	Name       string
 	Tags       []string
 	Start, End time.Time
-	Duration   time.Duration
+}
+
+func (e Event) Duration() time.Duration {
+	return e.End.Sub(e.Start)
 }
 
 func NewEvent(name string, start, end time.Time, tags []string) Event {
 	return Event{
-		Name:     name,
-		Start:    start,
-		End:      end,
-		Tags:     tags,
-		Duration: end.Sub(start),
+		Name:  name,
+		Start: start,
+		End:   end,
+		Tags:  tags,
 	}
 }
 

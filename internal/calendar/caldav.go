@@ -124,11 +124,10 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, start, end time.T
 			}
 
 			out = append(out, Event{
-				Name:     name,
-				Tags:     tags,
-				Start:    start,
-				End:      end,
-				Duration: end.Sub(start),
+				Name:  name,
+				Tags:  tags,
+				Start: start,
+				End:   end,
 			})
 		}
 	}

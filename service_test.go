@@ -35,10 +35,37 @@ func TestLayerEvents(t *testing.T) {
 				calendar.NewEvent("C", datetime(9, 50), datetime(10, 0), nil),
 			},
 		},
+		{
+			input: []calendar.Event{
+				calendar.NewEvent("A", datetime(9, 0), datetime(9, 15), nil),
+				calendar.NewEvent("B", datetime(9, 15), datetime(9, 30), nil),
+				calendar.NewEvent("C", datetime(9, 30), datetime(9, 45), nil),
+			},
+			expect: []calendar.Event{
+				calendar.NewEvent("A", datetime(9, 0), datetime(9, 15), nil),
+				calendar.NewEvent("B", datetime(9, 15), datetime(9, 30), nil),
+				calendar.NewEvent("C", datetime(9, 30), datetime(9, 45), nil),
+			},
+		},
+		{
+			input: []calendar.Event{
+				calendar.NewEvent("A", datetime(9, 0), datetime(9, 15), nil),
+				calendar.NewEvent("B", datetime(9, 15), datetime(9, 45), nil),
+				calendar.NewEvent("C", datetime(9, 30), datetime(9, 40), nil),
+			},
+			expect: []calendar.Event{
+				calendar.NewEvent("A", datetime(9, 0), datetime(9, 15), nil),
+				calendar.NewEvent("B", datetime(9, 15), datetime(9, 30), nil),
+				calendar.NewEvent("C", datetime(9, 30), datetime(9, 40), nil),
+				calendar.NewEvent("B", datetime(9, 40), datetime(9, 45), nil),
+			},
+		},
 	}
 
 	for _, test := range table {
-		result := LayerEvents(test.input)
+		result := make([]calendar.Event, len(test.input))
+		copy(result, test.input)
+		DeoverlapEvents(&result)
 		if len(test.expect) != len(result) {
 			t.Fatalf(
 				"event lists are not equal\n\nInput: %s\n\nExpected: %s\n\nResult: %s",
