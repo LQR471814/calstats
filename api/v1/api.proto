@@ -1,24 +1,28 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+message Interval {
+  google.protobuf.Timestamp start = 1;
+  google.protobuf.Timestamp end = 2;
+}
 
 message Event {
+  // the name is an index for the lookup table of event names
   uint32 name = 1;
-  // each element is an index for a tag
+  // each element is an index for the lookup table of tag names
   repeated uint32 tags = 2;
-  google.protobuf.Timestamp start = 3;
-  google.protobuf.Timestamp end = 4;
-  // duration is in minutes
-  uint32 duration = 5;
+  Interval interval = 3;
+  google.protobuf.Duration duration = 4;
 }
 
 // Events
 message EventsRequest {
-  google.protobuf.Timestamp start = 1;
-  google.protobuf.Timestamp end = 2;
+  Interval interval = 1;
 }
 message EventsResponse {
-  repeated string names = 1;
+  repeated string event_names = 1;
   repeated string tags = 2;
   repeated Event events = 3;
 }

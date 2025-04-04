@@ -9,6 +9,7 @@ import (
 	"slices"
 
 	"connectrpc.com/connect"
+	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -139,7 +140,11 @@ func (s CalendarService) Events(ctx context.Context, req *connect.Request[v1.Eve
 		return nil, fmt.Errorf("find calendar: not found '%s'", s.calendarName)
 	}
 
-	eventList, err := s.source.Events(ctx, cal, req.Msg.Start.AsTime(), req.Msg.End.AsTime())
+	eventList, err := s.source.Events(
+		ctx, cal,
+		req.Msg.Interval.Start.AsTime(),
+		req.Msg.Interval.End.AsTime(),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -178,11 +183,13 @@ func (s CalendarService) Events(ctx context.Context, req *connect.Request[v1.Eve
 			curNameIdx++
 		}
 		pbEvents[eventIdx] = &v1.Event{
-			Name:     nameIdx,
-			Tags:     tags,
-			Start:    timestamppb.New(event.Start),
-			End:      timestamppb.New(event.End),
-			Duration: uint32(event.Duration().Minutes()),
+			Name: nameIdx,
+			Tags: tags,
+			Interval: &v1.Interval{
+				Start: timestamppb.New(event.Start),
+				End:   timestamppb.New(event.End),
+			},
+			Duration: durationpb.New(event.Duration()),
 		}
 	}
 
@@ -196,8 +203,8 @@ func (s CalendarService) Events(ctx context.Context, req *connect.Request[v1.Eve
 	}
 
 	return connect.NewResponse(&v1.EventsResponse{
-		Names:  nameLookup,
-		Tags:   tagLookup,
-		Events: pbEvents,
+		EventNames: nameLookup,
+		Tags:       tagLookup,
+		Events:     pbEvents,
 	}), nil
 }

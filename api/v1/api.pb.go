@@ -9,6 +9,7 @@ package v1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	durationpb "google.golang.org/protobuf/types/known/durationpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
@@ -22,22 +23,73 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type Interval struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Start         *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=start,proto3" json:"start,omitempty"`
+	End           *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=end,proto3" json:"end,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Interval) Reset() {
+	*x = Interval{}
+	mi := &file_v1_api_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Interval) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Interval) ProtoMessage() {}
+
+func (x *Interval) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_api_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Interval.ProtoReflect.Descriptor instead.
+func (*Interval) Descriptor() ([]byte, []int) {
+	return file_v1_api_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *Interval) GetStart() *timestamppb.Timestamp {
+	if x != nil {
+		return x.Start
+	}
+	return nil
+}
+
+func (x *Interval) GetEnd() *timestamppb.Timestamp {
+	if x != nil {
+		return x.End
+	}
+	return nil
+}
+
 type Event struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	Name  uint32                 `protobuf:"varint,1,opt,name=name,proto3" json:"name,omitempty"`
-	// each element is an index for a tag
-	Tags  []uint32               `protobuf:"varint,2,rep,packed,name=tags,proto3" json:"tags,omitempty"`
-	Start *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=start,proto3" json:"start,omitempty"`
-	End   *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=end,proto3" json:"end,omitempty"`
-	// duration is in minutes
-	Duration      uint32 `protobuf:"varint,5,opt,name=duration,proto3" json:"duration,omitempty"`
+	// the name is an index for the lookup table of event names
+	Name uint32 `protobuf:"varint,1,opt,name=name,proto3" json:"name,omitempty"`
+	// each element is an index for the lookup table of tag names
+	Tags          []uint32             `protobuf:"varint,2,rep,packed,name=tags,proto3" json:"tags,omitempty"`
+	Interval      *Interval            `protobuf:"bytes,3,opt,name=interval,proto3" json:"interval,omitempty"`
+	Duration      *durationpb.Duration `protobuf:"bytes,4,opt,name=duration,proto3" json:"duration,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Event) Reset() {
 	*x = Event{}
-	mi := &file_v1_api_proto_msgTypes[0]
+	mi := &file_v1_api_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -49,7 +101,7 @@ func (x *Event) String() string {
 func (*Event) ProtoMessage() {}
 
 func (x *Event) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_api_proto_msgTypes[0]
+	mi := &file_v1_api_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -62,7 +114,7 @@ func (x *Event) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Event.ProtoReflect.Descriptor instead.
 func (*Event) Descriptor() ([]byte, []int) {
-	return file_v1_api_proto_rawDescGZIP(), []int{0}
+	return file_v1_api_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Event) GetName() uint32 {
@@ -79,39 +131,31 @@ func (x *Event) GetTags() []uint32 {
 	return nil
 }
 
-func (x *Event) GetStart() *timestamppb.Timestamp {
+func (x *Event) GetInterval() *Interval {
 	if x != nil {
-		return x.Start
+		return x.Interval
 	}
 	return nil
 }
 
-func (x *Event) GetEnd() *timestamppb.Timestamp {
-	if x != nil {
-		return x.End
-	}
-	return nil
-}
-
-func (x *Event) GetDuration() uint32 {
+func (x *Event) GetDuration() *durationpb.Duration {
 	if x != nil {
 		return x.Duration
 	}
-	return 0
+	return nil
 }
 
 // Events
 type EventsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Start         *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=start,proto3" json:"start,omitempty"`
-	End           *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=end,proto3" json:"end,omitempty"`
+	Interval      *Interval              `protobuf:"bytes,1,opt,name=interval,proto3" json:"interval,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *EventsRequest) Reset() {
 	*x = EventsRequest{}
-	mi := &file_v1_api_proto_msgTypes[1]
+	mi := &file_v1_api_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -123,7 +167,7 @@ func (x *EventsRequest) String() string {
 func (*EventsRequest) ProtoMessage() {}
 
 func (x *EventsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_api_proto_msgTypes[1]
+	mi := &file_v1_api_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -136,26 +180,19 @@ func (x *EventsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EventsRequest.ProtoReflect.Descriptor instead.
 func (*EventsRequest) Descriptor() ([]byte, []int) {
-	return file_v1_api_proto_rawDescGZIP(), []int{1}
+	return file_v1_api_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *EventsRequest) GetStart() *timestamppb.Timestamp {
+func (x *EventsRequest) GetInterval() *Interval {
 	if x != nil {
-		return x.Start
-	}
-	return nil
-}
-
-func (x *EventsRequest) GetEnd() *timestamppb.Timestamp {
-	if x != nil {
-		return x.End
+		return x.Interval
 	}
 	return nil
 }
 
 type EventsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Names         []string               `protobuf:"bytes,1,rep,name=names,proto3" json:"names,omitempty"`
+	EventNames    []string               `protobuf:"bytes,1,rep,name=event_names,json=eventNames,proto3" json:"event_names,omitempty"`
 	Tags          []string               `protobuf:"bytes,2,rep,name=tags,proto3" json:"tags,omitempty"`
 	Events        []*Event               `protobuf:"bytes,3,rep,name=events,proto3" json:"events,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -164,7 +201,7 @@ type EventsResponse struct {
 
 func (x *EventsResponse) Reset() {
 	*x = EventsResponse{}
-	mi := &file_v1_api_proto_msgTypes[2]
+	mi := &file_v1_api_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -176,7 +213,7 @@ func (x *EventsResponse) String() string {
 func (*EventsResponse) ProtoMessage() {}
 
 func (x *EventsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_api_proto_msgTypes[2]
+	mi := &file_v1_api_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -189,12 +226,12 @@ func (x *EventsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EventsResponse.ProtoReflect.Descriptor instead.
 func (*EventsResponse) Descriptor() ([]byte, []int) {
-	return file_v1_api_proto_rawDescGZIP(), []int{2}
+	return file_v1_api_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *EventsResponse) GetNames() []string {
+func (x *EventsResponse) GetEventNames() []string {
 	if x != nil {
-		return x.Names
+		return x.EventNames
 	}
 	return nil
 }
@@ -217,18 +254,20 @@ var File_v1_api_proto protoreflect.FileDescriptor
 
 const file_v1_api_proto_rawDesc = "" +
 	"\n" +
-	"\fv1/api.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xab\x01\n" +
+	"\fv1/api.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/duration.proto\"j\n" +
+	"\bInterval\x120\n" +
+	"\x05start\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\x05start\x12,\n" +
+	"\x03end\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x03end\"\x8d\x01\n" +
 	"\x05Event\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\rR\x04name\x12\x12\n" +
-	"\x04tags\x18\x02 \x03(\rR\x04tags\x120\n" +
-	"\x05start\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x05start\x12,\n" +
-	"\x03end\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\x03end\x12\x1a\n" +
-	"\bduration\x18\x05 \x01(\rR\bduration\"o\n" +
-	"\rEventsRequest\x120\n" +
-	"\x05start\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\x05start\x12,\n" +
-	"\x03end\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x03end\"Z\n" +
-	"\x0eEventsResponse\x12\x14\n" +
-	"\x05names\x18\x01 \x03(\tR\x05names\x12\x12\n" +
+	"\x04tags\x18\x02 \x03(\rR\x04tags\x12%\n" +
+	"\binterval\x18\x03 \x01(\v2\t.IntervalR\binterval\x125\n" +
+	"\bduration\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\bduration\"6\n" +
+	"\rEventsRequest\x12%\n" +
+	"\binterval\x18\x01 \x01(\v2\t.IntervalR\binterval\"e\n" +
+	"\x0eEventsResponse\x12\x1f\n" +
+	"\vevent_names\x18\x01 \x03(\tR\n" +
+	"eventNames\x12\x12\n" +
 	"\x04tags\x18\x02 \x03(\tR\x04tags\x12\x1e\n" +
 	"\x06events\x18\x03 \x03(\v2\x06.EventR\x06events2<\n" +
 	"\x0fCalendarService\x12)\n" +
@@ -246,26 +285,29 @@ func file_v1_api_proto_rawDescGZIP() []byte {
 	return file_v1_api_proto_rawDescData
 }
 
-var file_v1_api_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_v1_api_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_v1_api_proto_goTypes = []any{
-	(*Event)(nil),                 // 0: Event
-	(*EventsRequest)(nil),         // 1: EventsRequest
-	(*EventsResponse)(nil),        // 2: EventsResponse
-	(*timestamppb.Timestamp)(nil), // 3: google.protobuf.Timestamp
+	(*Interval)(nil),              // 0: Interval
+	(*Event)(nil),                 // 1: Event
+	(*EventsRequest)(nil),         // 2: EventsRequest
+	(*EventsResponse)(nil),        // 3: EventsResponse
+	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),   // 5: google.protobuf.Duration
 }
 var file_v1_api_proto_depIdxs = []int32{
-	3, // 0: Event.start:type_name -> google.protobuf.Timestamp
-	3, // 1: Event.end:type_name -> google.protobuf.Timestamp
-	3, // 2: EventsRequest.start:type_name -> google.protobuf.Timestamp
-	3, // 3: EventsRequest.end:type_name -> google.protobuf.Timestamp
-	0, // 4: EventsResponse.events:type_name -> Event
-	1, // 5: CalendarService.Events:input_type -> EventsRequest
-	2, // 6: CalendarService.Events:output_type -> EventsResponse
-	6, // [6:7] is the sub-list for method output_type
-	5, // [5:6] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	4, // 0: Interval.start:type_name -> google.protobuf.Timestamp
+	4, // 1: Interval.end:type_name -> google.protobuf.Timestamp
+	0, // 2: Event.interval:type_name -> Interval
+	5, // 3: Event.duration:type_name -> google.protobuf.Duration
+	0, // 4: EventsRequest.interval:type_name -> Interval
+	1, // 5: EventsResponse.events:type_name -> Event
+	2, // 6: CalendarService.Events:input_type -> EventsRequest
+	3, // 7: CalendarService.Events:output_type -> EventsResponse
+	7, // [7:8] is the sub-list for method output_type
+	6, // [6:7] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_v1_api_proto_init() }
@@ -279,7 +321,7 @@ func file_v1_api_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_api_proto_rawDesc), len(file_v1_api_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
