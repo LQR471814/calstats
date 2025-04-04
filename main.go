@@ -64,7 +64,11 @@ func printCal(ctx context.Context, source calendar.Source, calendarName string) 
 		return fmt.Errorf("find calendar: not found '%s'", calendarName)
 	}
 
-	events, err := source.Events(ctx, cal, time.Time{}, time.Now().Add(365*24*time.Hour))
+	now := time.Now()
+	start := now.AddDate(0, -1, 0)
+	end := now.AddDate(0, 1, 0)
+
+	events, err := source.Events(ctx, cal, start, end)
 	if err != nil {
 		return err
 	}

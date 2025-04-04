@@ -1,11 +1,9 @@
 package calendar
 
 import (
-	"calendar-summary/internal/tel"
 	"context"
 	"crypto/tls"
 	"fmt"
-	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -14,6 +12,7 @@ import (
 	"github.com/emersion/go-ical"
 	"github.com/emersion/go-webdav"
 	"github.com/emersion/go-webdav/caldav"
+	"github.com/teambition/rrule-go"
 )
 
 type Caldav struct {
@@ -70,69 +69,37 @@ func (c Caldav) Calendars(ctx context.Context) ([]Calendar, error) {
 	return out, nil
 }
 
-func parseWeekday(weekday string) time.Weekday {
+func parseWeekday(weekday string) (rrule.Weekday, error) {
 	switch weekday {
 	case "MO":
-		return time.Monday
+		return rrule.MO, nil
 	case "TU":
-		return time.Tuesday
+		return rrule.TU, nil
 	case "WE":
-		return time.Wednesday
+		return rrule.WE, nil
 	case "TH":
-		return time.Thursday
+		return rrule.TH, nil
 	case "FR":
-		return time.Friday
+		return rrule.FR, nil
 	case "SA":
-		return time.Saturday
+		return rrule.SA, nil
 	case "SU":
-		return time.Sunday
+		return rrule.SU, nil
 	}
-	return -1
+	return rrule.MO, fmt.Errorf("invalid weekday %s", weekday)
 }
 
-func (c Caldav) applyRecurrence(out *[]Event, end time.Time, ev Event, recurrence string) {
-	type freq int
+func wrapRRULEErr(err error) error {
+	return fmt.Errorf("RRULE: %w", err)
+}
 
-	const (
-		freq_yearly freq = iota
-		freq_monthly
-		freq_weekly
-		freq_daily
-		freq_hourly
-		freq_minutely
-		freq_secondly
-	)
+func parseRecurrence(text string) (rrule.ROption, error) {
+	var rules rrule.ROption
 
-	type byDayRules struct {
-		Offset   int
-		Weekdays []time.Weekday
-	}
-
-	type recurRules struct {
-		FREQ     freq
-		INTERVAL int
-		UNTIL    time.Time
-		COUNT    int
-
-		BYDAY      byDayRules
-		BYMONTHDAY []int
-		BYMONTH    []time.Month
-		BYYEARDAY  []int
-		BYWEEKNO   []int
-		BYHOUR     []int
-		BYMINUTE   []int
-		BYSECOND   []int
-
-		WKST time.Weekday
-	}
-
-	var rules recurRules
-
-	for _, pair := range strings.Split(recurrence, ";") {
-		segments := strings.Split(pair, "=")
+	for _, prop := range strings.Split(text, ";") {
+		segments := strings.Split(prop, "=")
 		if len(segments) < 2 {
-			tel.Log.Warn("caldav", "invalid RRULE pair", "pair", pair)
-			continue
+			return rules, wrapRRULEErr(fmt.Errorf("invalid property '%s'", prop))
 		}
 		key := segments[0]
 		value := segments[1]
@@ -141,80 +108,75 @@ func (c Caldav) applyRecurrence(out *[]Event, end time.Time, ev Event, recurrenc
 		case "FREQ":
 			switch value {
 			case "YEARLY":
-				rules.FREQ = freq_yearly
+				rules.Freq = rrule.YEARLY
 			case "MONTHLY":
-				rules.FREQ = freq_monthly
+				rules.Freq = rrule.MONTHLY
 			case "WEEKLY":
-				rules.FREQ = freq_weekly
+				rules.Freq = rrule.WEEKLY
 			case "DAILY":
-				rules.FREQ = freq_daily
+				rules.Freq = rrule.DAILY
 			case "HOURLY":
-				rules.FREQ = freq_hourly
+				rules.Freq = rrule.HOURLY
 			case "MINUTELY":
-				rules.FREQ = freq_minutely
+				rules.Freq = rrule.MINUTELY
 			case "SECONDLY":
-				rules.FREQ = freq_secondly
+				rules.Freq = rrule.SECONDLY
+			default:
+				return rules, wrapRRULEErr(fmt.Errorf("invalid FREQ value '%s'", value))
 			}
 
 		case "INTERVAL":
 			val, err := strconv.ParseInt(value, 10, 64)
 			if err != nil {
-				tel.Log.Error("caldav", "invalid INTERVAL value", "value", value, "err", err)
-				continue
+				return rules, wrapRRULEErr(fmt.Errorf("invalid INTERNAL value '%s': %w", value, err))
 			}
-			rules.INTERVAL = int(val)
+			rules.Interval = int(val)
 
 		case "UNTIL":
 			t, err := time.Parse("20060102T150405Z", value)
 			if err != nil {
-				tel.Log.Error("caldav", "invalid UNTIL value", "value", value, "err", err)
-				continue
+				return rules, wrapRRULEErr(fmt.Errorf("invalid UNTIL value '%s': %w", value, err))
 			}
-			rules.UNTIL = t
+			rules.Until = t
 
 		case "COUNT":
 			count, err := strconv.ParseInt(value, 10, 64)
 			if err != nil {
-				tel.Log.Error("caldav", "invalid COUNT value", "value", value, "err", err)
-				continue
+				return rules, wrapRRULEErr(fmt.Errorf("invalid COUNT value '%s': %w", value, err))
 			}
-			rules.COUNT = int(count)
+			rules.Count = int(count)
 
 		case "BYDAY":
-			negative := false
-			offset := ""
-			var weekdays []string
-			for i, c := range value {
-				if c == '-' && i == 0 {
-					negative = true
-					continue
+			segments := strings.Split(value, ",")
+
+			for _, dayDef := range segments {
+				offsetStr := ""
+				day := ""
+
+				for _, c := range dayDef {
+					if (c >= '0' && c <= '9') || c == '-' {
+						offsetStr += string(c)
+						continue
+					}
+					if c >= 'A' && c <= 'Z' {
+						day += string(c)
+						continue
+					}
 				}
-				if c >= '0' && c <= '9' {
-					offset += string(c)
-					continue
+
+				var offset int64
+				if offsetStr != "" {
+					var err error
+					offset, err = strconv.ParseInt(offsetStr, 10, 64)
+					if err != nil {
+						return rules, wrapRRULEErr(fmt.Errorf("invalid BYDAY value: %w", err))
+					}
 				}
-				if c == ',' {
-					weekdays = append(weekdays, "")
-					continue
-				}
-				if c >= 'A' && c <= 'Z' {
-					weekdays[len(weekdays)-1] += string(c)
-					continue
-				}
-			}
-			if offset != "" {
-				parsed, err := strconv.ParseInt(value, 10, 64)
+				weekday, err := parseWeekday(day)
 				if err != nil {
-					tel.Log.Error("caldav", "invalid BYDAY value", "value", value, "err", err)
-					continue
+					return rules, wrapRRULEErr(fmt.Errorf("invalid BYDAY value: %w", err))
 				}
-				rules.BYDAY.Offset = int(parsed)
-				if negative {
-					rules.BYDAY.Offset *= -1
-				}
-			}
-			for _, w := range weekdays {
-				rules.BYDAY.Weekdays = append(rules.BYDAY.Weekdays, parseWeekday(w))
+				rules.Byweekday = append(rules.Byweekday, weekday.Nth(int(offset)))
 			}
 
 		case "BYMONTHDAY":
@@ -222,15 +184,9 @@ func (c Caldav) applyRecurrence(out *[]Event, end time.Time, ev Event, recurrenc
 			for _, v := range values {
 				parsed, err := strconv.ParseInt(v, 10, 64)
 				if err != nil {
-					tel.Log.Error(
-						"caldav", "invalid BYMONTHDAY value",
-						"value", v,
-						"entirety", value,
-						"err", err,
-					)
-					continue
+					return rules, wrapRRULEErr(fmt.Errorf("invalid BYMONTHDAY value '%s': %w", value, err))
 				}
-				rules.BYMONTHDAY = append(rules.BYMONTHDAY, int(parsed))
+				rules.Bymonthday = append(rules.Bymonthday, int(parsed))
 			}
 
 		case "BYMONTH":
@@ -238,15 +194,12 @@ func (c Caldav) applyRecurrence(out *[]Event, end time.Time, ev Event, recurrenc
 			for _, v := range values {
 				parsed, err := strconv.ParseInt(v, 10, 64)
 				if err != nil {
-					tel.Log.Error(
-						"caldav", "invalid BYMONTH value",
-						"value", v,
-						"entirety", value,
-						"err", err,
-					)
-					continue
+					return rules, wrapRRULEErr(fmt.Errorf(
+						"invalid BYMONTH value '%s' (whole: '%s'): %w",
+						v, value, err,
+					))
 				}
-				rules.BYMONTH = append(rules.BYMONTH, time.Month(parsed))
+				rules.Bymonth = append(rules.Bymonth, int(parsed))
 			}
 
 		case "BYYEARDAY":
@@ -254,15 +207,12 @@ func (c Caldav) applyRecurrence(out *[]Event, end time.Time, ev Event, recurrenc
 			for _, v := range values {
 				parsed, err := strconv.ParseInt(v, 10, 64)
 				if err != nil {
-					tel.Log.Error(
-						"caldav", "invalid BYYEARDAY value",
-						"value", v,
-						"entirety", value,
-						"err", err,
-					)
-					continue
+					return rules, wrapRRULEErr(fmt.Errorf(
+						"invalid BYYEARDAY value '%s' (whole: '%s'): %w",
+						v, value, err,
+					))
 				}
-				rules.BYYEARDAY = append(rules.BYYEARDAY, int(parsed))
+				rules.Byyearday = append(rules.Byyearday, int(parsed))
 			}
 
 		case "BYWEEKNO":
@@ -270,15 +220,12 @@ func (c Caldav) applyRecurrence(out *[]Event, end time.Time, ev Event, recurrenc
 			for _, v := range values {
 				parsed, err := strconv.ParseInt(v, 10, 64)
 				if err != nil {
-					tel.Log.Error(
-						"caldav", "invalid BYWEEKNO value",
-						"value", v,
-						"entirety", value,
-						"err", err,
-					)
-					continue
+					return rules, wrapRRULEErr(fmt.Errorf(
+						"invalid BYWEEKNO value '%s' (whole: %s): %w",
+						v, value, err,
+					))
 				}
-				rules.BYWEEKNO = append(rules.BYWEEKNO, int(parsed))
+				rules.Byweekno = append(rules.Byweekno, int(parsed))
 			}
 
 		case "BYHOUR":
@@ -286,15 +233,12 @@ func (c Caldav) applyRecurrence(out *[]Event, end time.Time, ev Event, recurrenc
 			for _, v := range values {
 				parsed, err := strconv.ParseInt(v, 10, 64)
 				if err != nil {
-					tel.Log.Error(
-						"caldav", "invalid BYHOUR value",
-						"value", v,
-						"entirety", value,
-						"err", err,
-					)
-					continue
+					return rules, wrapRRULEErr(fmt.Errorf(
+						"invalid BYHOUR value '%s' (whole: %s): %w",
+						v, value, err,
+					))
 				}
-				rules.BYHOUR = append(rules.BYHOUR, int(parsed))
+				rules.Byhour = append(rules.Byhour, int(parsed))
 			}
 
 		case "BYMINUTE":
@@ -302,15 +246,12 @@ func (c Caldav) applyRecurrence(out *[]Event, end time.Time, ev Event, recurrenc
 			for _, v := range values {
 				parsed, err := strconv.ParseInt(v, 10, 64)
 				if err != nil {
-					tel.Log.Error(
-						"caldav", "invalid BYMINUTE value",
-						"value", v,
-						"entirety", value,
-						"err", err,
-					)
-					continue
+					return rules, wrapRRULEErr(fmt.Errorf(
+						"invalid BYMINUTE value '%s' (whole: %s): %w",
+						v, value, err,
+					))
 				}
-				rules.BYMINUTE = append(rules.BYMINUTE, int(parsed))
+				rules.Byminute = append(rules.Byminute, int(parsed))
 			}
 
 		case "BYSECOND":
@@ -318,71 +259,41 @@ func (c Caldav) applyRecurrence(out *[]Event, end time.Time, ev Event, recurrenc
 			for _, v := range values {
 				parsed, err := strconv.ParseInt(v, 10, 64)
 				if err != nil {
-					tel.Log.Error(
-						"caldav", "invalid BYSECOND value",
-						"value", v,
-						"entirety", value,
-						"err", err,
-					)
-					continue
+					return rules, wrapRRULEErr(fmt.Errorf(
+						"invalid BYSECOND value '%s' (whole: %s): %w",
+						v, value, err,
+					))
 				}
-				rules.BYSECOND = append(rules.BYSECOND, int(parsed))
+				rules.Bysecond = append(rules.Bysecond, int(parsed))
 			}
 
 		case "WKST":
-			rules.WKST = parseWeekday(value)
-		}
-	}
-
-	if rules.INTERVAL == 0 {
-		rules.INTERVAL = 1
-	}
-	if rules.COUNT == 0 {
-		rules.COUNT = math.MaxInt
-	}
-
-	count := 1
-	current := ev.Start
-	for {
-		switch rules.FREQ {
-		case freq_secondly:
-			if len(rules.BYSECOND) > 0 {
-				current = current.Add(time.Second)
-				break
+			var err error
+			rules.Wkst, err = parseWeekday(value)
+			if err != nil {
+				return rules, wrapRRULEErr(fmt.Errorf(
+					"invalid WKST value '%s': %w",
+					value, err,
+				))
 			}
-			var nextup int
-			for _, sec := range rules.BYSECOND {
-				if sec > current.Second() {
-					nextup = sec
-					break
-				}
-			}
-		case freq_minutely:
-			current = current.Add(time.Minute)
-		case freq_hourly:
-			current = current.Add(time.Hour)
-		case freq_daily:
-			current = current.AddDate(0, 0, 1)
-		}
-
-		count++
-		if count >= rules.COUNT {
-			break
-		}
-		if count%rules.INTERVAL != 0 {
-			continue
 		}
 	}
+
+	return rules, nil
 }
 
-func (c Caldav) Events(ctx context.Context, calendar Calendar, start, end time.Time) ([]Event, error) {
+func wrapEventsErr(err error) error {
+	return fmt.Errorf("get events: %w", err)
+}
+
+func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEnd time.Time) ([]Event, error) {
 	query := &caldav.CalendarQuery{
 		CompFilter: caldav.CompFilter{
 			Name: "VCALENDAR",
 			Comps: []caldav.CompFilter{{
 				Name:  "VEVENT",
-				Start: start,
-				End:   end,
+				Start: intvStart,
+				End:   intvEnd,
 			}},
 		},
 		CompRequest: caldav.CalendarCompRequest{
@@ -402,7 +313,7 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, start, end time.T
 
 	events, err := c.client.QueryCalendar(ctx, calendar.Id, query)
 	if err != nil {
-		return nil, fmt.Errorf("get cal events: %w", err)
+		return nil, wrapEventsErr(err)
 	}
 
 	var out []Event
@@ -410,11 +321,11 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, start, end time.T
 		for _, e := range eobj.Data.Events() {
 			start, err := e.DateTimeStart(time.Local)
 			if err != nil {
-				return nil, err
+				return nil, wrapEventsErr(err)
 			}
 			end, err := e.DateTimeEnd(time.Local)
 			if err != nil {
-				return nil, err
+				return nil, wrapEventsErr(err)
 			}
 
 			name := ""
@@ -428,7 +339,7 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, start, end time.T
 			if categories != nil {
 				tags, err = categories.TextList()
 				if err != nil {
-					return nil, err
+					return nil, wrapEventsErr(err)
 				}
 			}
 
@@ -438,10 +349,30 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, start, end time.T
 				Start: start,
 				End:   end,
 			}
+			duration := end.Sub(start)
 			out = append(out, ev)
 
 			recurrence := e.Props.Get(ical.PropRecurrenceRule)
 			if recurrence != nil {
+				opts, err := parseRecurrence(recurrence.Value)
+				if err != nil {
+					return nil, wrapEventsErr(err)
+				}
+				if opts.Until == (time.Time{}) || opts.Until.After(intvEnd) {
+					opts.Until = intvEnd
+				}
+				rule, err := rrule.NewRRule(opts)
+				if err != nil {
+					return nil, wrapEventsErr(err)
+				}
+				for _, recurTime := range rule.All() {
+					out = append(out, Event{
+						Name:  name,
+						Tags:  tags,
+						Start: recurTime,
+						End:   recurTime.Add(duration),
+					})
+				}
 			}
 		}
 	}
