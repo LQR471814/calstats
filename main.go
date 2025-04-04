@@ -13,6 +13,8 @@ import (
 	"slices"
 	"time"
 
+	connectcors "connectrpc.com/cors"
+	"github.com/rs/cors"
 	"github.com/titanous/json5"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -89,6 +91,16 @@ func printCal(ctx context.Context, source calendar.Source, calendarName string) 
 	return nil
 }
 
+func withCORS(connectHandler http.Handler) http.Handler {
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: connectcors.AllowedMethods(),
+		AllowedHeaders: connectcors.AllowedHeaders(),
+		ExposedHeaders: connectcors.ExposedHeaders(),
+	})
+	return c.Handler(connectHandler)
+}
+
 func main() {
 	cfgPath := flag.String("config", "config.json5", "Configuration path.")
 	port := flag.Int("port", 8003, "The port to host on.")
@@ -123,10 +135,11 @@ func main() {
 	tel.Log.Info("main", "listening to gRPC...", "port", *port)
 
 	mux := http.NewServeMux()
-	mux.Handle(v1connect.NewCalendarServiceHandler(CalendarService{
+	handle, handler := v1connect.NewCalendarServiceHandler(CalendarService{
 		calendarName: cfg.CalendarName,
 		source:       source,
-	}))
+	})
+	mux.Handle(handle, withCORS(handler))
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", *port),
 		Handler: h2c.NewHandler(mux, &http2.Server{}),
