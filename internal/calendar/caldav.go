@@ -343,17 +343,11 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 				}
 			}
 
-			ev := Event{
-				Name:  name,
-				Tags:  tags,
-				Start: start,
-				End:   end,
-			}
 			duration := end.Sub(start)
-			out = append(out, ev)
 
 			recurrence := e.Props.Get(ical.PropRecurrenceRule)
 			if recurrence != nil {
+				// recurring event
 				opts, err := parseRecurrence(recurrence.Value)
 				if err != nil {
 					return nil, wrapEventsErr(err)
@@ -373,7 +367,17 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 						End:   recurTime.Add(duration),
 					})
 				}
+				continue
 			}
+
+			// single event
+			ev := Event{
+				Name:  name,
+				Tags:  tags,
+				Start: start,
+				End:   end,
+			}
+			out = append(out, ev)
 		}
 	}
 
