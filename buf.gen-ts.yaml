@@ -1,10 +1,10 @@
 version: v2
 plugins:
   - remote: buf.build/bufbuild/es:v2.2.5
-    out: api
+    out: ui/src/lib/api
     opt: target=ts
   - remote: buf.build/connectrpc/query-es:v2.0.1
-    out: api
+    out: ui/src/lib/api
     opt: target=ts
 inputs:
   - directory: api
