@@ -24,7 +24,7 @@ const (
 
 type Event struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Name  uint32                 `protobuf:"varint,1,opt,name=name,proto3" json:"name,omitempty"`
 	// each element is an index for a tag
 	Tags  []uint32               `protobuf:"varint,2,rep,packed,name=tags,proto3" json:"tags,omitempty"`
 	Start *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=start,proto3" json:"start,omitempty"`
@@ -65,11 +65,11 @@ func (*Event) Descriptor() ([]byte, []int) {
 	return file_v1_api_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Event) GetName() string {
+func (x *Event) GetName() uint32 {
 	if x != nil {
 		return x.Name
 	}
-	return ""
+	return 0
 }
 
 func (x *Event) GetTags() []uint32 {
@@ -103,6 +103,8 @@ func (x *Event) GetDuration() uint32 {
 // Events
 type EventsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Start         *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=start,proto3" json:"start,omitempty"`
+	End           *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=end,proto3" json:"end,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -137,10 +139,25 @@ func (*EventsRequest) Descriptor() ([]byte, []int) {
 	return file_v1_api_proto_rawDescGZIP(), []int{1}
 }
 
+func (x *EventsRequest) GetStart() *timestamppb.Timestamp {
+	if x != nil {
+		return x.Start
+	}
+	return nil
+}
+
+func (x *EventsRequest) GetEnd() *timestamppb.Timestamp {
+	if x != nil {
+		return x.End
+	}
+	return nil
+}
+
 type EventsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Tags          []string               `protobuf:"bytes,1,rep,name=tags,proto3" json:"tags,omitempty"`
-	Events        []*Event               `protobuf:"bytes,2,rep,name=events,proto3" json:"events,omitempty"`
+	Names         []string               `protobuf:"bytes,1,rep,name=names,proto3" json:"names,omitempty"`
+	Tags          []string               `protobuf:"bytes,2,rep,name=tags,proto3" json:"tags,omitempty"`
+	Events        []*Event               `protobuf:"bytes,3,rep,name=events,proto3" json:"events,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -175,6 +192,13 @@ func (*EventsResponse) Descriptor() ([]byte, []int) {
 	return file_v1_api_proto_rawDescGZIP(), []int{2}
 }
 
+func (x *EventsResponse) GetNames() []string {
+	if x != nil {
+		return x.Names
+	}
+	return nil
+}
+
 func (x *EventsResponse) GetTags() []string {
 	if x != nil {
 		return x.Tags
@@ -195,15 +219,18 @@ const file_v1_api_proto_rawDesc = "" +
 	"\n" +
 	"\fv1/api.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xab\x01\n" +
 	"\x05Event\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\rR\x04name\x12\x12\n" +
 	"\x04tags\x18\x02 \x03(\rR\x04tags\x120\n" +
 	"\x05start\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x05start\x12,\n" +
 	"\x03end\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\x03end\x12\x1a\n" +
-	"\bduration\x18\x05 \x01(\rR\bduration\"\x0f\n" +
-	"\rEventsRequest\"D\n" +
-	"\x0eEventsResponse\x12\x12\n" +
-	"\x04tags\x18\x01 \x03(\tR\x04tags\x12\x1e\n" +
-	"\x06events\x18\x02 \x03(\v2\x06.EventR\x06events2<\n" +
+	"\bduration\x18\x05 \x01(\rR\bduration\"o\n" +
+	"\rEventsRequest\x120\n" +
+	"\x05start\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\x05start\x12,\n" +
+	"\x03end\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x03end\"Z\n" +
+	"\x0eEventsResponse\x12\x14\n" +
+	"\x05names\x18\x01 \x03(\tR\x05names\x12\x12\n" +
+	"\x04tags\x18\x02 \x03(\tR\x04tags\x12\x1e\n" +
+	"\x06events\x18\x03 \x03(\v2\x06.EventR\x06events2<\n" +
 	"\x0fCalendarService\x12)\n" +
 	"\x06Events\x12\x0e.EventsRequest\x1a\x0f.EventsResponseB%B\bApiProtoP\x01Z\x17calendar-summary/api/v1b\x06proto3"
 
@@ -229,14 +256,16 @@ var file_v1_api_proto_goTypes = []any{
 var file_v1_api_proto_depIdxs = []int32{
 	3, // 0: Event.start:type_name -> google.protobuf.Timestamp
 	3, // 1: Event.end:type_name -> google.protobuf.Timestamp
-	0, // 2: EventsResponse.events:type_name -> Event
-	1, // 3: CalendarService.Events:input_type -> EventsRequest
-	2, // 4: CalendarService.Events:output_type -> EventsResponse
-	4, // [4:5] is the sub-list for method output_type
-	3, // [3:4] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	3, // 2: EventsRequest.start:type_name -> google.protobuf.Timestamp
+	3, // 3: EventsRequest.end:type_name -> google.protobuf.Timestamp
+	0, // 4: EventsResponse.events:type_name -> Event
+	1, // 5: CalendarService.Events:input_type -> EventsRequest
+	2, // 6: CalendarService.Events:output_type -> EventsResponse
+	6, // [6:7] is the sub-list for method output_type
+	5, // [5:6] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_v1_api_proto_init() }

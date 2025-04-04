@@ -3,7 +3,7 @@ syntax = "proto3";
 import "google/protobuf/timestamp.proto";
 
 message Event {
-  string name = 1;
+  uint32 name = 1;
   // each element is an index for a tag
   repeated uint32 tags = 2;
   google.protobuf.Timestamp start = 3;
@@ -13,10 +13,14 @@ message Event {
 }
 
 // Events
-message EventsRequest {}
+message EventsRequest {
+  google.protobuf.Timestamp start = 1;
+  google.protobuf.Timestamp end = 2;
+}
 message EventsResponse {
-  repeated string tags = 1;
-  repeated Event events = 2;
+  repeated string names = 1;
+  repeated string tags = 2;
+  repeated Event events = 3;
 }
 
 service CalendarService {

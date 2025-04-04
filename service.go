@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
-	"time"
 
 	"connectrpc.com/connect"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -140,7 +139,7 @@ func (s CalendarService) Events(ctx context.Context, req *connect.Request[v1.Eve
 		return nil, fmt.Errorf("find calendar: not found '%s'", s.calendarName)
 	}
 
-	eventList, err := s.source.Events(ctx, cal, time.Time{}, time.Now().Add(365*24*time.Hour))
+	eventList, err := s.source.Events(ctx, cal, req.Msg.Start.AsTime(), req.Msg.End.AsTime())
 	if err != nil {
 		return nil, err
 	}
@@ -155,23 +154,31 @@ func (s CalendarService) Events(ctx context.Context, req *connect.Request[v1.Eve
 
 	curTagIdx := uint32(0)
 	tagIdxTable := map[string]uint32{}
+	curNameIdx := uint32(0)
+	nameIdxTable := map[string]uint32{}
 	pbEvents := make([]*v1.Event, len(eventList))
 	for eventIdx, event := range eventList {
 		var tags []uint32
 		if len(event.Tags) > 0 {
 			tags = make([]uint32, len(event.Tags))
 			for i, tagName := range event.Tags {
-				outTagIdx, ok := tagIdxTable[tagName]
+				tagIdx, ok := tagIdxTable[tagName]
 				if !ok {
 					tagIdxTable[tagName] = curTagIdx
-					outTagIdx = curTagIdx
+					tagIdx = curTagIdx
 					curTagIdx++
 				}
-				tags[i] = outTagIdx
+				tags[i] = tagIdx
 			}
 		}
+		nameIdx, ok := nameIdxTable[event.Name]
+		if !ok {
+			nameIdxTable[event.Name] = curNameIdx
+			nameIdx = curNameIdx
+			curNameIdx++
+		}
 		pbEvents[eventIdx] = &v1.Event{
-			Name:     event.Name,
+			Name:     nameIdx,
 			Tags:     tags,
 			Start:    timestamppb.New(event.Start),
 			End:      timestamppb.New(event.End),
@@ -179,12 +186,17 @@ func (s CalendarService) Events(ctx context.Context, req *connect.Request[v1.Eve
 		}
 	}
 
+	nameLookup := make([]string, len(nameIdxTable))
+	for n, idx := range nameIdxTable {
+		nameLookup[int(idx)] = n
+	}
 	tagLookup := make([]string, len(tagIdxTable))
 	for k, idx := range tagIdxTable {
 		tagLookup[int(idx)] = k
 	}
 
 	return connect.NewResponse(&v1.EventsResponse{
+		Names:  nameLookup,
 		Tags:   tagLookup,
 		Events: pbEvents,
 	}), nil
