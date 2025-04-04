@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -69,14 +70,46 @@ func (c Caldav) Calendars(ctx context.Context) ([]Calendar, error) {
 	return out, nil
 }
 
-func (c Caldav) applyRecurrence(end time.Time, ev Event, recurrence string) {
+func parseWeekday(weekday string) time.Weekday {
+	switch weekday {
+	case "MO":
+		return time.Monday
+	case "TU":
+		return time.Tuesday
+	case "WE":
+		return time.Wednesday
+	case "TH":
+		return time.Thursday
+	case "FR":
+		return time.Friday
+	case "SA":
+		return time.Saturday
+	case "SU":
+		return time.Sunday
+	}
+	return -1
+}
+
+func (c Caldav) applyRecurrence(out *[]Event, end time.Time, ev Event, recurrence string) {
+	type freq int
+
+	const (
+		freq_yearly freq = iota
+		freq_monthly
+		freq_weekly
+		freq_daily
+		freq_hourly
+		freq_minutely
+		freq_secondly
+	)
+
 	type byDayRules struct {
 		Offset   int
 		Weekdays []time.Weekday
 	}
 
 	type recurRules struct {
-		FREQ     string
+		FREQ     freq
 		INTERVAL int
 		UNTIL    time.Time
 		COUNT    int
@@ -88,6 +121,7 @@ func (c Caldav) applyRecurrence(end time.Time, ev Event, recurrence string) {
 		BYWEEKNO   []int
 		BYHOUR     []int
 		BYMINUTE   []int
+		BYSECOND   []int
 
 		WKST time.Weekday
 	}
@@ -102,9 +136,26 @@ func (c Caldav) applyRecurrence(end time.Time, ev Event, recurrence string) {
 		}
 		key := segments[0]
 		value := segments[1]
+
 		switch key {
 		case "FREQ":
-			rules.FREQ = value
+			switch value {
+			case "YEARLY":
+				rules.FREQ = freq_yearly
+			case "MONTHLY":
+				rules.FREQ = freq_monthly
+			case "WEEKLY":
+				rules.FREQ = freq_weekly
+			case "DAILY":
+				rules.FREQ = freq_daily
+			case "HOURLY":
+				rules.FREQ = freq_hourly
+			case "MINUTELY":
+				rules.FREQ = freq_minutely
+			case "SECONDLY":
+				rules.FREQ = freq_secondly
+			}
+
 		case "INTERVAL":
 			val, err := strconv.ParseInt(value, 10, 64)
 			if err != nil {
@@ -112,6 +163,7 @@ func (c Caldav) applyRecurrence(end time.Time, ev Event, recurrence string) {
 				continue
 			}
 			rules.INTERVAL = int(val)
+
 		case "UNTIL":
 			t, err := time.Parse("20060102T150405Z", value)
 			if err != nil {
@@ -119,6 +171,7 @@ func (c Caldav) applyRecurrence(end time.Time, ev Event, recurrence string) {
 				continue
 			}
 			rules.UNTIL = t
+
 		case "COUNT":
 			count, err := strconv.ParseInt(value, 10, 64)
 			if err != nil {
@@ -126,6 +179,7 @@ func (c Caldav) applyRecurrence(end time.Time, ev Event, recurrence string) {
 				continue
 			}
 			rules.COUNT = int(count)
+
 		case "BYDAY":
 			negative := false
 			offset := ""
@@ -160,26 +214,165 @@ func (c Caldav) applyRecurrence(end time.Time, ev Event, recurrence string) {
 				}
 			}
 			for _, w := range weekdays {
-				switch w {
-				case "MO":
-					rules.BYDAY.Weekdays = append(rules.BYDAY.Weekdays, time.Monday)
-				case "TU":
-					rules.BYDAY.Weekdays = append(rules.BYDAY.Weekdays, time.Tuesday)
-				case "WE":
-					rules.BYDAY.Weekdays = append(rules.BYDAY.Weekdays, time.Wednesday)
-				case "TH":
-					rules.BYDAY.Weekdays = append(rules.BYDAY.Weekdays, time.Thursday)
-				case "FR":
-					rules.BYDAY.Weekdays = append(rules.BYDAY.Weekdays, time.Friday)
-				case "SA":
-					rules.BYDAY.Weekdays = append(rules.BYDAY.Weekdays, time.Saturday)
-				case "SU":
-					rules.BYDAY.Weekdays = append(rules.BYDAY.Weekdays, time.Sunday)
-				}
+				rules.BYDAY.Weekdays = append(rules.BYDAY.Weekdays, parseWeekday(w))
 			}
+
+		case "BYMONTHDAY":
+			values := strings.Split(value, ",")
+			for _, v := range values {
+				parsed, err := strconv.ParseInt(v, 10, 64)
+				if err != nil {
+					tel.Log.Error(
+						"caldav", "invalid BYMONTHDAY value",
+						"value", v,
+						"entirety", value,
+						"err", err,
+					)
+					continue
+				}
+				rules.BYMONTHDAY = append(rules.BYMONTHDAY, int(parsed))
+			}
+
+		case "BYMONTH":
+			values := strings.Split(value, ",")
+			for _, v := range values {
+				parsed, err := strconv.ParseInt(v, 10, 64)
+				if err != nil {
+					tel.Log.Error(
+						"caldav", "invalid BYMONTH value",
+						"value", v,
+						"entirety", value,
+						"err", err,
+					)
+					continue
+				}
+				rules.BYMONTH = append(rules.BYMONTH, time.Month(parsed))
+			}
+
+		case "BYYEARDAY":
+			values := strings.Split(value, ",")
+			for _, v := range values {
+				parsed, err := strconv.ParseInt(v, 10, 64)
+				if err != nil {
+					tel.Log.Error(
+						"caldav", "invalid BYYEARDAY value",
+						"value", v,
+						"entirety", value,
+						"err", err,
+					)
+					continue
+				}
+				rules.BYYEARDAY = append(rules.BYYEARDAY, int(parsed))
+			}
+
+		case "BYWEEKNO":
+			values := strings.Split(value, ",")
+			for _, v := range values {
+				parsed, err := strconv.ParseInt(v, 10, 64)
+				if err != nil {
+					tel.Log.Error(
+						"caldav", "invalid BYWEEKNO value",
+						"value", v,
+						"entirety", value,
+						"err", err,
+					)
+					continue
+				}
+				rules.BYWEEKNO = append(rules.BYWEEKNO, int(parsed))
+			}
+
+		case "BYHOUR":
+			values := strings.Split(value, ",")
+			for _, v := range values {
+				parsed, err := strconv.ParseInt(v, 10, 64)
+				if err != nil {
+					tel.Log.Error(
+						"caldav", "invalid BYHOUR value",
+						"value", v,
+						"entirety", value,
+						"err", err,
+					)
+					continue
+				}
+				rules.BYHOUR = append(rules.BYHOUR, int(parsed))
+			}
+
+		case "BYMINUTE":
+			values := strings.Split(value, ",")
+			for _, v := range values {
+				parsed, err := strconv.ParseInt(v, 10, 64)
+				if err != nil {
+					tel.Log.Error(
+						"caldav", "invalid BYMINUTE value",
+						"value", v,
+						"entirety", value,
+						"err", err,
+					)
+					continue
+				}
+				rules.BYMINUTE = append(rules.BYMINUTE, int(parsed))
+			}
+
+		case "BYSECOND":
+			values := strings.Split(value, ",")
+			for _, v := range values {
+				parsed, err := strconv.ParseInt(v, 10, 64)
+				if err != nil {
+					tel.Log.Error(
+						"caldav", "invalid BYSECOND value",
+						"value", v,
+						"entirety", value,
+						"err", err,
+					)
+					continue
+				}
+				rules.BYSECOND = append(rules.BYSECOND, int(parsed))
+			}
+
+		case "WKST":
+			rules.WKST = parseWeekday(value)
 		}
 	}
 
+	if rules.INTERVAL == 0 {
+		rules.INTERVAL = 1
+	}
+	if rules.COUNT == 0 {
+		rules.COUNT = math.MaxInt
+	}
+
+	count := 1
+	current := ev.Start
+	for {
+		switch rules.FREQ {
+		case freq_secondly:
+			if len(rules.BYSECOND) > 0 {
+				current = current.Add(time.Second)
+				break
+			}
+			var nextup int
+			for _, sec := range rules.BYSECOND {
+				if sec > current.Second() {
+					nextup = sec
+					break
+				}
+			}
+		case freq_minutely:
+			current = current.Add(time.Minute)
+		case freq_hourly:
+			current = current.Add(time.Hour)
+		case freq_daily:
+			current = current.AddDate(0, 0, 1)
+		}
+
+		count++
+		if count >= rules.COUNT {
+			break
+		}
+		if count%rules.INTERVAL != 0 {
+			continue
+		}
+	}
 }
 
 func (c Caldav) Events(ctx context.Context, calendar Calendar, start, end time.Time) ([]Event, error) {
