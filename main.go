@@ -116,7 +116,7 @@ func main() {
 		return
 	}
 
-	tel.Log.Info("main", "listening to gRPC...", "port", port)
+	tel.Log.Info("main", "listening to gRPC...", "port", *port)
 
 	mux := http.NewServeMux()
 	mux.Handle(v1connect.NewCalendarServiceHandler(CalendarService{
@@ -124,7 +124,7 @@ func main() {
 		source:       source,
 	}))
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", port),
+		Addr:    fmt.Sprintf(":%d", *port),
 		Handler: h2c.NewHandler(mux, &http2.Server{}),
 	}
 	go func() {
