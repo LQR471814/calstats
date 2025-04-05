@@ -5,11 +5,11 @@
 package v1connect
 
 import (
-	v1 "calendar-summary/api/v1"
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
 	http "net/http"
+	v1 "schedule-statistics/api/v1"
 	strings "strings"
 )
 

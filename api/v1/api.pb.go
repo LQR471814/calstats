@@ -271,7 +271,7 @@ const file_v1_api_proto_rawDesc = "" +
 	"\x04tags\x18\x02 \x03(\tR\x04tags\x12\x1e\n" +
 	"\x06events\x18\x03 \x03(\v2\x06.EventR\x06events2<\n" +
 	"\x0fCalendarService\x12)\n" +
-	"\x06Events\x12\x0e.EventsRequest\x1a\x0f.EventsResponseB%B\bApiProtoP\x01Z\x17calendar-summary/api/v1b\x06proto3"
+	"\x06Events\x12\x0e.EventsRequest\x1a\x0f.EventsResponseB(B\bApiProtoP\x01Z\x1aschedule-statistics/api/v1b\x06proto3"
 
 var (
 	file_v1_api_proto_rawDescOnce sync.Once

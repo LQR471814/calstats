@@ -1,4 +1,4 @@
-module calendar-summary
+module schedule-statistics
 
 go 1.23.4
 

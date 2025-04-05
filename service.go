@@ -1,8 +1,8 @@
 package main
 
 import (
-	v1 "calendar-summary/api/v1"
-	"calendar-summary/internal/calendar"
+	v1 "schedule-statistics/api/v1"
+	"schedule-statistics/internal/calendar"
 	"context"
 	"encoding/json"
 	"fmt"

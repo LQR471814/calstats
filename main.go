@@ -1,9 +1,9 @@
 package main
 
 import (
-	"calendar-summary/api/v1/v1connect"
-	"calendar-summary/internal/calendar"
-	"calendar-summary/internal/tel"
+	"schedule-statistics/api/v1/v1connect"
+	"schedule-statistics/internal/calendar"
+	"schedule-statistics/internal/tel"
 	"context"
 	"flag"
 	"fmt"

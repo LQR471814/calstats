@@ -3,7 +3,7 @@ managed:
   enabled: true
   override:
     - file_option: go_package_prefix
-      value: calendar-summary/api
+      value: schedule-statistics/api
 plugins:
   - remote: buf.build/protocolbuffers/go:v1.36.6
     out: api
