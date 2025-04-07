@@ -15,9 +15,13 @@
 		"checkJs": true,
 		"isolatedModules": true,
 		"moduleDetection": "force",
+		"baseUrl": ".",
 		"paths": {
 			"$api/*": [
 				"./src/lib/api/v1/*"
+			],
+			"$lib": [
+				"./src/lib"
 			],
 			"$lib/*": [
 				"./src/lib/*"

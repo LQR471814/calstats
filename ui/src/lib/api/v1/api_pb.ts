@@ -2,75 +2,92 @@
 // @generated from file v1/api.proto (syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv1";
-import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv1";
-import type { Duration, Timestamp } from "@bufbuild/protobuf/wkt";
-import { file_google_protobuf_duration, file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
 import type { Message } from "@bufbuild/protobuf";
+import type {
+	GenFile,
+	GenMessage,
+	GenService,
+} from "@bufbuild/protobuf/codegenv1";
+import {
+	fileDesc,
+	messageDesc,
+	serviceDesc,
+} from "@bufbuild/protobuf/codegenv1";
+import type { Duration, Timestamp } from "@bufbuild/protobuf/wkt";
+import {
+	file_google_protobuf_duration,
+	file_google_protobuf_timestamp,
+} from "@bufbuild/protobuf/wkt";
 
 /**
  * Describes the file v1/api.proto.
  */
-export const file_v1_api: GenFile = /*@__PURE__*/
-  fileDesc("Cgx2MS9hcGkucHJvdG8iXgoISW50ZXJ2YWwSKQoFc3RhcnQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEicKA2VuZBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAibQoFRXZlbnQSDAoEbmFtZRgBIAEoDRIMCgR0YWdzGAIgAygNEhsKCGludGVydmFsGAMgASgLMgkuSW50ZXJ2YWwSKwoIZHVyYXRpb24YBCABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24iLAoNRXZlbnRzUmVxdWVzdBIbCghpbnRlcnZhbBgBIAEoCzIJLkludGVydmFsIksKDkV2ZW50c1Jlc3BvbnNlEhMKC2V2ZW50X25hbWVzGAEgAygJEgwKBHRhZ3MYAiADKAkSFgoGZXZlbnRzGAMgAygLMgYuRXZlbnQyPAoPQ2FsZW5kYXJTZXJ2aWNlEikKBkV2ZW50cxIOLkV2ZW50c1JlcXVlc3QaDy5FdmVudHNSZXNwb25zZWIGcHJvdG8z", [file_google_protobuf_timestamp, file_google_protobuf_duration]);
+export const file_v1_api: GenFile =
+	/*@__PURE__*/
+	fileDesc(
+		"Cgx2MS9hcGkucHJvdG8iXgoISW50ZXJ2YWwSKQoFc3RhcnQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEicKA2VuZBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAibQoFRXZlbnQSDAoEbmFtZRgBIAEoDRIMCgR0YWdzGAIgAygNEhsKCGludGVydmFsGAMgASgLMgkuSW50ZXJ2YWwSKwoIZHVyYXRpb24YBCABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24iLAoNRXZlbnRzUmVxdWVzdBIbCghpbnRlcnZhbBgBIAEoCzIJLkludGVydmFsIksKDkV2ZW50c1Jlc3BvbnNlEhMKC2V2ZW50X25hbWVzGAEgAygJEgwKBHRhZ3MYAiADKAkSFgoGZXZlbnRzGAMgAygLMgYuRXZlbnQyPAoPQ2FsZW5kYXJTZXJ2aWNlEikKBkV2ZW50cxIOLkV2ZW50c1JlcXVlc3QaDy5FdmVudHNSZXNwb25zZWIGcHJvdG8z",
+		[file_google_protobuf_timestamp, file_google_protobuf_duration],
+	);
 
 /**
  * @generated from message Interval
  */
 export type Interval = Message<"Interval"> & {
-  /**
-   * @generated from field: google.protobuf.Timestamp start = 1;
-   */
-  start?: Timestamp;
+	/**
+	 * @generated from field: google.protobuf.Timestamp start = 1;
+	 */
+	start?: Timestamp;
 
-  /**
-   * @generated from field: google.protobuf.Timestamp end = 2;
-   */
-  end?: Timestamp;
+	/**
+	 * @generated from field: google.protobuf.Timestamp end = 2;
+	 */
+	end?: Timestamp;
 };
 
 /**
  * Describes the message Interval.
  * Use `create(IntervalSchema)` to create a new message.
  */
-export const IntervalSchema: GenMessage<Interval> = /*@__PURE__*/
-  messageDesc(file_v1_api, 0);
+export const IntervalSchema: GenMessage<Interval> =
+	/*@__PURE__*/
+	messageDesc(file_v1_api, 0);
 
 /**
  * @generated from message Event
  */
 export type Event = Message<"Event"> & {
-  /**
-   * the name is an index for the lookup table of event names
-   *
-   * @generated from field: uint32 name = 1;
-   */
-  name: number;
+	/**
+	 * the name is an index for the lookup table of event names
+	 *
+	 * @generated from field: uint32 name = 1;
+	 */
+	name: number;
 
-  /**
-   * each element is an index for the lookup table of tag names
-   *
-   * @generated from field: repeated uint32 tags = 2;
-   */
-  tags: number[];
+	/**
+	 * each element is an index for the lookup table of tag names
+	 *
+	 * @generated from field: repeated uint32 tags = 2;
+	 */
+	tags: number[];
 
-  /**
-   * @generated from field: Interval interval = 3;
-   */
-  interval?: Interval;
+	/**
+	 * @generated from field: Interval interval = 3;
+	 */
+	interval?: Interval;
 
-  /**
-   * @generated from field: google.protobuf.Duration duration = 4;
-   */
-  duration?: Duration;
+	/**
+	 * @generated from field: google.protobuf.Duration duration = 4;
+	 */
+	duration?: Duration;
 };
 
 /**
  * Describes the message Event.
  * Use `create(EventSchema)` to create a new message.
  */
-export const EventSchema: GenMessage<Event> = /*@__PURE__*/
-  messageDesc(file_v1_api, 1);
+export const EventSchema: GenMessage<Event> =
+	/*@__PURE__*/
+	messageDesc(file_v1_api, 1);
 
 /**
  * Events
@@ -78,58 +95,58 @@ export const EventSchema: GenMessage<Event> = /*@__PURE__*/
  * @generated from message EventsRequest
  */
 export type EventsRequest = Message<"EventsRequest"> & {
-  /**
-   * @generated from field: Interval interval = 1;
-   */
-  interval?: Interval;
+	/**
+	 * @generated from field: Interval interval = 1;
+	 */
+	interval?: Interval;
 };
 
 /**
  * Describes the message EventsRequest.
  * Use `create(EventsRequestSchema)` to create a new message.
  */
-export const EventsRequestSchema: GenMessage<EventsRequest> = /*@__PURE__*/
-  messageDesc(file_v1_api, 2);
+export const EventsRequestSchema: GenMessage<EventsRequest> =
+	/*@__PURE__*/
+	messageDesc(file_v1_api, 2);
 
 /**
  * @generated from message EventsResponse
  */
 export type EventsResponse = Message<"EventsResponse"> & {
-  /**
-   * @generated from field: repeated string event_names = 1;
-   */
-  eventNames: string[];
+	/**
+	 * @generated from field: repeated string event_names = 1;
+	 */
+	eventNames: string[];
 
-  /**
-   * @generated from field: repeated string tags = 2;
-   */
-  tags: string[];
+	/**
+	 * @generated from field: repeated string tags = 2;
+	 */
+	tags: string[];
 
-  /**
-   * @generated from field: repeated Event events = 3;
-   */
-  events: Event[];
+	/**
+	 * @generated from field: repeated Event events = 3;
+	 */
+	events: Event[];
 };
 
 /**
  * Describes the message EventsResponse.
  * Use `create(EventsResponseSchema)` to create a new message.
  */
-export const EventsResponseSchema: GenMessage<EventsResponse> = /*@__PURE__*/
-  messageDesc(file_v1_api, 3);
+export const EventsResponseSchema: GenMessage<EventsResponse> =
+	/*@__PURE__*/
+	messageDesc(file_v1_api, 3);
 
 /**
  * @generated from service CalendarService
  */
 export const CalendarService: GenService<{
-  /**
-   * @generated from rpc CalendarService.Events
-   */
-  events: {
-    methodKind: "unary";
-    input: typeof EventsRequestSchema;
-    output: typeof EventsResponseSchema;
-  },
-}> = /*@__PURE__*/
-  serviceDesc(file_v1_api, 0);
-
+	/**
+	 * @generated from rpc CalendarService.Events
+	 */
+	events: {
+		methodKind: "unary";
+		input: typeof EventsRequestSchema;
+		output: typeof EventsResponseSchema;
+	};
+}> = /*@__PURE__*/ serviceDesc(file_v1_api, 0);

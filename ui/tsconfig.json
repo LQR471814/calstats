@@ -1,7 +1,25 @@
 {
 	"files": [],
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"$api/*": [
+				"./src/lib/api/v1/*"
+			],
+			"$lib": [
+				"./src/lib"
+			],
+			"$lib/*": [
+				"./src/lib/*"
+			]
+		}
+	},
 	"references": [
-		{ "path": "./tsconfig.app.json" },
-		{ "path": "./tsconfig.node.json" }
+		{
+			"path": "./tsconfig.app.json"
+		},
+		{
+			"path": "./tsconfig.node.json"
+		}
 	]
 }
