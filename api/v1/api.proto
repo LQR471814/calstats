@@ -17,6 +17,13 @@ message Event {
   google.protobuf.Duration duration = 4;
 }
 
+// Calendar
+message CalendarRequest {}
+message CalendarResponse {
+  string calendar_server = 1;
+  repeated string names = 2;
+}
+
 // Events
 message EventsRequest {
   Interval interval = 1;
@@ -28,6 +35,7 @@ message EventsResponse {
 }
 
 service CalendarService {
+  rpc Calendar(CalendarRequest) returns (CalendarResponse);
   rpc Events(EventsRequest) returns (EventsResponse);
 }
 

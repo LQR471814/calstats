@@ -2,6 +2,7 @@ import type { EventsResponse } from "$api/api_pb";
 import { instantToTimestamp } from "$lib/time";
 import { Temporal } from "@js-temporal/polyfill";
 import { client } from "./rpc";
+import { toast } from "svelte-sonner"
 
 export type Interval = {
 	start: Temporal.ZonedDateTime;
@@ -132,7 +133,10 @@ $effect(() => {
 			events = res;
 		})
 		.catch((err) => {
-			console.error("failed to fetch", err);
-			// TODO: do something with this error
+			toast.error("RPC Error", {
+				description: String(err),
+				duration: 3000,
+			})
 		});
 });
+

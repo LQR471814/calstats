@@ -5,6 +5,11 @@
 import { CalendarService } from "./api_pb";
 
 /**
+ * @generated from rpc CalendarService.Calendar
+ */
+export const calendar = CalendarService.method.calendar;
+
+/**
  * @generated from rpc CalendarService.Events
  */
 export const events = CalendarService.method.events;

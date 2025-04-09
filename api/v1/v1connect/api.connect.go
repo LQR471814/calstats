@@ -33,12 +33,16 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
+	// CalendarServiceCalendarProcedure is the fully-qualified name of the CalendarService's Calendar
+	// RPC.
+	CalendarServiceCalendarProcedure = "/CalendarService/Calendar"
 	// CalendarServiceEventsProcedure is the fully-qualified name of the CalendarService's Events RPC.
 	CalendarServiceEventsProcedure = "/CalendarService/Events"
 )
 
 // CalendarServiceClient is a client for the CalendarService service.
 type CalendarServiceClient interface {
+	Calendar(context.Context, *connect.Request[v1.CalendarRequest]) (*connect.Response[v1.CalendarResponse], error)
 	Events(context.Context, *connect.Request[v1.EventsRequest]) (*connect.Response[v1.EventsResponse], error)
 }
 
@@ -53,6 +57,12 @@ func NewCalendarServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 	baseURL = strings.TrimRight(baseURL, "/")
 	calendarServiceMethods := v1.File_v1_api_proto.Services().ByName("CalendarService").Methods()
 	return &calendarServiceClient{
+		calendar: connect.NewClient[v1.CalendarRequest, v1.CalendarResponse](
+			httpClient,
+			baseURL+CalendarServiceCalendarProcedure,
+			connect.WithSchema(calendarServiceMethods.ByName("Calendar")),
+			connect.WithClientOptions(opts...),
+		),
 		events: connect.NewClient[v1.EventsRequest, v1.EventsResponse](
 			httpClient,
 			baseURL+CalendarServiceEventsProcedure,
@@ -64,7 +74,13 @@ func NewCalendarServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 
 // calendarServiceClient implements CalendarServiceClient.
 type calendarServiceClient struct {
-	events *connect.Client[v1.EventsRequest, v1.EventsResponse]
+	calendar *connect.Client[v1.CalendarRequest, v1.CalendarResponse]
+	events   *connect.Client[v1.EventsRequest, v1.EventsResponse]
+}
+
+// Calendar calls CalendarService.Calendar.
+func (c *calendarServiceClient) Calendar(ctx context.Context, req *connect.Request[v1.CalendarRequest]) (*connect.Response[v1.CalendarResponse], error) {
+	return c.calendar.CallUnary(ctx, req)
 }
 
 // Events calls CalendarService.Events.
@@ -74,6 +90,7 @@ func (c *calendarServiceClient) Events(ctx context.Context, req *connect.Request
 
 // CalendarServiceHandler is an implementation of the CalendarService service.
 type CalendarServiceHandler interface {
+	Calendar(context.Context, *connect.Request[v1.CalendarRequest]) (*connect.Response[v1.CalendarResponse], error)
 	Events(context.Context, *connect.Request[v1.EventsRequest]) (*connect.Response[v1.EventsResponse], error)
 }
 
@@ -84,6 +101,12 @@ type CalendarServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewCalendarServiceHandler(svc CalendarServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
 	calendarServiceMethods := v1.File_v1_api_proto.Services().ByName("CalendarService").Methods()
+	calendarServiceCalendarHandler := connect.NewUnaryHandler(
+		CalendarServiceCalendarProcedure,
+		svc.Calendar,
+		connect.WithSchema(calendarServiceMethods.ByName("Calendar")),
+		connect.WithHandlerOptions(opts...),
+	)
 	calendarServiceEventsHandler := connect.NewUnaryHandler(
 		CalendarServiceEventsProcedure,
 		svc.Events,
@@ -92,6 +115,8 @@ func NewCalendarServiceHandler(svc CalendarServiceHandler, opts ...connect.Handl
 	)
 	return "/CalendarService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case CalendarServiceCalendarProcedure:
+			calendarServiceCalendarHandler.ServeHTTP(w, r)
 		case CalendarServiceEventsProcedure:
 			calendarServiceEventsHandler.ServeHTTP(w, r)
 		default:
@@ -102,6 +127,10 @@ func NewCalendarServiceHandler(svc CalendarServiceHandler, opts ...connect.Handl
 
 // UnimplementedCalendarServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedCalendarServiceHandler struct{}
+
+func (UnimplementedCalendarServiceHandler) Calendar(context.Context, *connect.Request[v1.CalendarRequest]) (*connect.Response[v1.CalendarResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("CalendarService.Calendar is not implemented"))
+}
 
 func (UnimplementedCalendarServiceHandler) Events(context.Context, *connect.Request[v1.EventsRequest]) (*connect.Response[v1.EventsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("CalendarService.Events is not implemented"))

@@ -1,11 +1,11 @@
 package main
 
 import (
-	v1 "schedule-statistics/api/v1"
-	"schedule-statistics/internal/calendar"
 	"context"
 	"encoding/json"
 	"fmt"
+	v1 "schedule-statistics/api/v1"
+	"schedule-statistics/internal/calendar"
 	"slices"
 
 	"connectrpc.com/connect"
@@ -14,8 +14,9 @@ import (
 )
 
 type CalendarService struct {
-	source       calendar.Caldav
-	calendarName string
+	source         calendar.Caldav
+	calendarServer string
+	calendars      []string
 }
 
 func prettyPrint(value any) string {
@@ -129,25 +130,30 @@ func (s CalendarService) Events(ctx context.Context, req *connect.Request[v1.Eve
 	if err != nil {
 		return nil, err
 	}
-	var cal calendar.Calendar
+	var cals []calendar.Calendar
 	for _, c := range calList {
-		if c.Name == s.calendarName {
-			cal = c
-			break
+		if slices.Contains(s.calendars, c.Name) {
+			cals = append(cals, c)
 		}
 	}
-	if cal.Id == "" {
-		return nil, fmt.Errorf("find calendar: not found '%s'", s.calendarName)
+	if len(cals) == 0 {
+		return nil, fmt.Errorf("find calendar: not found '%s'", s.calendars)
 	}
 
-	eventList, err := s.source.Events(
-		ctx, cal,
-		req.Msg.Interval.Start.AsTime(),
-		req.Msg.Interval.End.AsTime(),
-	)
-	if err != nil {
-		return nil, err
+	var eventList []calendar.Event
+
+	for _, c := range cals {
+		events, err := s.source.Events(
+			ctx, c,
+			req.Msg.Interval.Start.AsTime(),
+			req.Msg.Interval.End.AsTime(),
+		)
+		if err != nil {
+			return nil, err
+		}
+		eventList = append(eventList, events...)
 	}
+
 	slices.SortFunc(eventList, func(a, b calendar.Event) int {
 		diff := a.Start.Compare(b.Start)
 		if diff != 0 {
@@ -206,5 +212,12 @@ func (s CalendarService) Events(ctx context.Context, req *connect.Request[v1.Eve
 		EventNames: nameLookup,
 		Tags:       tagLookup,
 		Events:     pbEvents,
+	}), nil
+}
+
+func (s CalendarService) Calendar(ctx context.Context, req *connect.Request[v1.CalendarRequest]) (*connect.Response[v1.CalendarResponse], error) {
+	return connect.NewResponse(&v1.CalendarResponse{
+		CalendarServer: s.calendarServer,
+		Names:          s.calendars,
 	}), nil
 }

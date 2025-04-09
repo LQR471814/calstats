@@ -1,15 +1,15 @@
 package main
 
 import (
-	"schedule-statistics/api/v1/v1connect"
-	"schedule-statistics/internal/calendar"
-	"schedule-statistics/internal/tel"
 	"context"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
+	"schedule-statistics/api/v1/v1connect"
+	"schedule-statistics/internal/calendar"
+	"schedule-statistics/internal/tel"
 	"slices"
 	"time"
 
@@ -28,8 +28,8 @@ type ServerConfig struct {
 }
 
 type Config struct {
-	Server       ServerConfig `json:"server"`
-	CalendarName string       `json:"calendar_name"`
+	Server    ServerConfig `json:"server"`
+	Calendars []string     `json:"calendars"`
 }
 
 func readConfig(path string) (Config, error) {
@@ -50,20 +50,20 @@ func fatalerr(msg string, args ...any) {
 	os.Exit(1)
 }
 
-func printCal(ctx context.Context, source calendar.Source, calendarName string) error {
+func printCal(ctx context.Context, source calendar.Source, calname string) error {
 	calList, err := source.Calendars(ctx)
 	if err != nil {
 		return err
 	}
 	var cal calendar.Calendar
 	for _, c := range calList {
-		if c.Name == calendarName {
+		if c.Name == calname {
 			cal = c
 			break
 		}
 	}
 	if cal.Id == "" {
-		return fmt.Errorf("find calendar: not found '%s'", calendarName)
+		return fmt.Errorf("find calendar: not found '%s'", calname)
 	}
 
 	now := time.Now()
@@ -125,9 +125,12 @@ func main() {
 	}
 
 	if *debug {
-		err = printCal(ctx, source, cfg.CalendarName)
-		if err != nil {
-			fatalerr("print calendar", "err", err)
+		for _, cal := range cfg.Calendars {
+			tel.Log.Info("main", "===========", "calendar", cal)
+			err = printCal(ctx, source, cal)
+			if err != nil {
+				fatalerr("print calendar", "err", err)
+			}
 		}
 		return
 	}
@@ -136,8 +139,9 @@ func main() {
 
 	mux := http.NewServeMux()
 	handle, handler := v1connect.NewCalendarServiceHandler(CalendarService{
-		calendarName: cfg.CalendarName,
-		source:       source,
+		calendars:      cfg.Calendars,
+		calendarServer: cfg.Server.Url,
+		source:         source,
 	})
 	mux.Handle(handle, withCORS(handler))
 	server := &http.Server{
