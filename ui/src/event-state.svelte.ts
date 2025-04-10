@@ -1,8 +1,8 @@
-import type { EventsResponse } from "$api/api_pb";
 import { instantToTimestamp } from "$lib/time";
 import { Temporal } from "@js-temporal/polyfill";
 import { client } from "./rpc";
 import { toast } from "svelte-sonner"
+import { createQuery } from "@tanstack/svelte-query"
 
 export type Interval = {
 	start: Temporal.ZonedDateTime;
@@ -28,7 +28,7 @@ export const customInterval = $state<Interval>({
 
 export const interval = $state<IntervalOption>(IntervalOption.THIS_WEEK);
 
-const _interval = $derived((): Interval => {
+const _interval = $derived.by((): Interval => {
 	switch (interval) {
 		case IntervalOption.CUSTOM:
 			return customInterval;
@@ -118,25 +118,24 @@ const _interval = $derived((): Interval => {
 	}
 });
 
-export let events = $state<EventsResponse>();
-
-$effect(() => {
-	const int = _interval();
-	client
+export const events = createQuery($derived({
+	queryKey: ["events", _interval.start.toInstant().epochMilliseconds, _interval.end.toInstant().epochMilliseconds],
+	queryFn: () => client
 		.events({
 			interval: {
-				start: instantToTimestamp(int.start.toInstant()),
-				end: instantToTimestamp(int.end.toInstant()),
+				start: instantToTimestamp(_interval.start.toInstant()),
+				end: instantToTimestamp(_interval.end.toInstant()),
 			},
-		})
-		.then((res) => {
-			events = res;
-		})
-		.catch((err) => {
-			toast.error("RPC Error", {
-				description: String(err),
-				duration: 3000,
-			})
-		});
-});
+		}),
+}))
+
+events.subscribe(({ error }) => {
+	if (!error) {
+		return
+	}
+	toast.error("RPC Error", {
+		description: String(error),
+		duration: 3000,
+	})
+})
 

@@ -6,7 +6,11 @@ export type PieData = {
 	// proportion: number
 }[]
 
-export const pieData = $derived((): PieData | undefined => {
+const pieData = $derived.by(() => {
+
+})
+
+export function pieData(): PieData | undefined {
 	if (!events) {
 		return
 	}
@@ -41,4 +45,4 @@ export const pieData = $derived((): PieData | undefined => {
 	// }
 
 	return categories
-})
+}

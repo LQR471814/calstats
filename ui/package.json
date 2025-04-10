@@ -36,7 +36,7 @@
 		"@connectrpc/connect": "^2.0.2",
 		"@connectrpc/connect-web": "^2.0.2",
 		"@js-temporal/polyfill": "^0.5.1",
-		"@sveltestack/svelte-query": "^1.6.0",
+		"@tanstack/svelte-query": "^5.72.2",
 		"d3": "^7.9.0"
 	}
 }
