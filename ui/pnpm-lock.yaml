@@ -30,6 +30,9 @@ importers:
       '@biomejs/biome':
         specifier: 1.9.4
         version: 1.9.4
+      '@internationalized/date':
+        specifier: ^3.7.0
+        version: 3.7.0
       '@sveltejs/vite-plugin-svelte':
         specifier: ^5.0.3
         version: 5.0.3(svelte@5.25.3)(vite@6.2.3(@types/node@22.14.0)(jiti@1.21.7)(yaml@2.7.1))

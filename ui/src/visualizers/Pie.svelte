@@ -4,7 +4,6 @@
 	import { Label } from "$lib/components/ui/label";
 	import * as d3 from "d3";
 	import { cn } from "$lib/utils";
-	import { Temporal } from "@js-temporal/polyfill";
 
 	let { data }: { data: PieData } = $props();
 
@@ -83,13 +82,20 @@
 		{/each}
 	</g>
 
-	<text text-anchor="middle" fill="currentColor" dy="-1.2em">{label}</text>
-	<text text-anchor="middle" fill="currentColor">
+	<text
+		class="font-bold text-lg"
+		text-anchor="middle"
+		fill="currentColor"
+		dy="-1em"
+	>
+		{label}
+	</text>
+	<text text-anchor="middle" fill="currentColor" dy="0.2em">
 		{#if percent !== undefined}
 			{Math.round(percent * 1000) / 10}%
 		{/if}
 	</text>
-	<text text-anchor="middle" fill="currentColor" dy="1.2em">
+	<text text-anchor="middle" fill="currentColor" dy="1.4em">
 		{#if duration !== undefined}
 			{@const years = Math.floor(duration / 31_536_000)}
 			{@const yearsR = duration % 31_536_000}
