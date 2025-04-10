@@ -3,7 +3,6 @@ import type { EventsResponse } from "$api/api_pb";
 export type PieData = {
 	category: string
 	time: number
-	// proportion: number
 }[]
 
 export function getPieData(events: EventsResponse): PieData | undefined {
@@ -16,13 +15,11 @@ export function getPieData(events: EventsResponse): PieData | undefined {
 		categories[i] = {
 			category: events.tags[i],
 			time: 0,
-			// proportion: 0,
 		}
 	}
 	categories[events.tags.length] = {
 		category: "Unknown",
 		time: 0,
-		// proportion: 0
 	}
 
 	let total = 0
@@ -35,10 +32,6 @@ export function getPieData(events: EventsResponse): PieData | undefined {
 			e.tags[0] :
 			events.tags.length].time += Number(e.duration.seconds)
 	}
-
-	// for (const c of categories) {
-	// 	c.proportion = c.time / total
-	// }
 
 	return categories
 }
