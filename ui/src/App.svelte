@@ -3,10 +3,7 @@
 	import Dashboard from "./Dashboard.svelte";
 	import { ModeWatcher } from "mode-watcher";
 	import { Toaster } from "$lib/components/ui/sonner";
-	import {
-		QueryClient,
-		QueryClientProvider,
-	} from "@sveltestack/svelte-query";
+	import { QueryClient, QueryClientProvider } from "@tanstack/svelte-query";
 
 	const queryClient = new QueryClient();
 </script>

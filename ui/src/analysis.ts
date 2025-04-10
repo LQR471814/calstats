@@ -1,4 +1,4 @@
-import { events } from "./event-state.svelte";
+import type { EventsResponse } from "$api/api_pb";
 
 export type PieData = {
 	category: string
@@ -6,11 +6,7 @@ export type PieData = {
 	// proportion: number
 }[]
 
-const pieData = $derived.by(() => {
-
-})
-
-export function pieData(): PieData | undefined {
+export function getPieData(events: EventsResponse): PieData | undefined {
 	if (!events) {
 		return
 	}
