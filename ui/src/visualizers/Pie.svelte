@@ -52,7 +52,8 @@
 			{#if arcs[i]}
 				{@const hover = () => {
 					label = d.category;
-					percent = (arcs[i].endAngle - arcs[i].startAngle) / (2 * Math.PI);
+					percent =
+						(arcs[i].endAngle - arcs[i].startAngle) / (2 * Math.PI);
 					hovered = i;
 				}}
 				{@const blur = () => {
@@ -88,10 +89,13 @@
 
 <div class="flex flex-col gap-2 flex-wrap max-h-[200px] w-fit">
 	{#each data as d, i}
+		{@const c = color(d.category)}
+		{@const checked = !disabled.includes(d.category)}
 		<div class="w-fit">
 			<Checkbox
 				id={`pie-checkbox-${i}`}
-				checked={!disabled.includes(d.category)}
+				style={`border-color: ${c}; background-color: ${checked ? c : "transparent"}`}
+				checked={checked}
 				aria-labelledby={`pie-label-${i}`}
 				on:click={() => {
 					const idx = disabled.indexOf(d.category);
