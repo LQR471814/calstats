@@ -4,6 +4,7 @@
 	import { Label } from "$lib/components/ui/label";
 	import * as d3 from "d3";
 	import { cn } from "$lib/utils";
+	import { Temporal } from "@js-temporal/polyfill";
 
 	let { data }: { data: PieData } = $props();
 
@@ -31,6 +32,7 @@
 	let hovered = $state<number>();
 	let label = $state<string>();
 	let percent = $state<number>();
+	let duration = $state<number>();
 </script>
 
 <h3>Pie chart</h3>
@@ -40,24 +42,19 @@
 	{width}
 	height={width}
 >
-	<text text-anchor="middle" fill="currentColor" dy="-0.5em">{label}</text>
-	<text text-anchor="middle" fill="currentColor" dy="1em">
-		{#if percent}
-			{Math.round(percent * 1000) / 10}%
-		{/if}
-	</text>
-	<tspan x={0} y={0} dy="1.5em">of total time spent on this category.</tspan>
 	<g>
 		{#each data as d, i}
 			{#if arcs[i]}
 				{@const hover = () => {
 					label = d.category;
+					duration = d.time;
 					percent =
 						(arcs[i].endAngle - arcs[i].startAngle) / (2 * Math.PI);
 					hovered = i;
 				}}
 				{@const blur = () => {
 					label = undefined;
+					duration = undefined;
 					percent = undefined;
 					hovered = undefined;
 				}}
@@ -85,6 +82,55 @@
 			{/if}
 		{/each}
 	</g>
+
+	<text text-anchor="middle" fill="currentColor" dy="-1.2em">{label}</text>
+	<text text-anchor="middle" fill="currentColor">
+		{#if percent !== undefined}
+			{Math.round(percent * 1000) / 10}%
+		{/if}
+	</text>
+	<text text-anchor="middle" fill="currentColor" dy="1.2em">
+		{#if duration !== undefined}
+			{@const years = Math.floor(duration / 31_536_000)}
+			{@const yearsR = duration % 31_536_000}
+			{#if years > 1}
+				{years} years
+			{:else if years === 1}
+				{years} year
+			{/if}
+
+			{@const weeks = Math.floor(yearsR / 604_800)}
+			{@const weeksR = duration % 604_800}
+			{#if weeks > 1}
+				{weeks} weeks
+			{:else if weeks === 1}
+				{weeks} week
+			{/if}
+
+			{@const days = Math.floor(weeksR / 86_400)}
+			{@const daysR = duration % 86400}
+			{#if days > 1}
+				{days} days
+			{:else if days === 1}
+				{days} day
+			{/if}
+
+			{@const hours = Math.floor(daysR / 3_600)}
+			{@const hoursR = duration % 3600}
+			{#if hours > 1}
+				{hours} hours
+			{:else if hours === 1}
+				{hours} hour
+			{/if}
+
+			{@const minutes = Math.floor(hoursR / 60)}
+			{#if minutes > 1}
+				{minutes} minutes
+			{:else if minutes === 1}
+				{minutes} minute
+			{/if}
+		{/if}
+	</text>
 </svg>
 
 <div class="flex flex-col gap-2 flex-wrap max-h-[200px] w-fit">
@@ -95,7 +141,7 @@
 			<Checkbox
 				id={`pie-checkbox-${i}`}
 				style={`border-color: ${c}; background-color: ${checked ? c : "transparent"}`}
-				checked={checked}
+				{checked}
 				aria-labelledby={`pie-label-${i}`}
 				on:click={() => {
 					const idx = disabled.indexOf(d.category);
