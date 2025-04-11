@@ -1,17 +1,27 @@
-import type { EventsResponse } from "$api/api_pb";
+import type { EventsResponse, Event } from "$api/api_pb";
 import type { Interval } from "./event-state.svelte";
 
 export class CategoryStat {
 	category: string
 	time: number
 	proportion: number
+	events: Event[]
 
 	constructor(category: string, time: number, proportion: number) {
 		this.category = category
 		this.time = time
 		this.proportion = proportion
+		this.events = []
 	}
 
+	add(e: Event) {
+		this.events.push(e)
+		if (!e.duration) {
+			throw new Error("undefined duration")
+		}
+		this.time += Number(e.duration.seconds)
+	}
+	
 	formatTime(): string {
 		const out: string[] = [];
 
@@ -76,12 +86,11 @@ export function getCategoryStats(interval: Interval, events: EventsResponse): Ca
 			throw new Error("undefined duration")
 		}
 
-		const seconds = Number(e.duration.seconds)
 		const tagIdx = e.tags.length > 0 ?
 			e.tags[0] : events.tags.length
 
-		categories[tagIdx].time += seconds
-		countedSeconds += seconds
+		categories[tagIdx].add(e)
+		countedSeconds += Number(e.duration.seconds)
 	}
 
 	// count untracked or time without an event on it

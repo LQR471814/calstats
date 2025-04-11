@@ -37,6 +37,7 @@
 	<h3>Pie chart</h3>
 
 	<svg
+		class="mx-auto"
 		viewBox={`-${outerRadius} -${outerRadius} ${width} ${width}`}
 		{width}
 		height={width}
