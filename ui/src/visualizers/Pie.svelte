@@ -165,9 +165,8 @@
 			<Checkbox
 				id={`pie-checkbox-${i}`}
 				style={`border-color: ${c}; background-color: ${checked ? c : "transparent"}`}
-				{checked}
-				aria-labelledby={`pie-label-${i}`}
-				onclick={() => {
+				bind:checked={() => checked,
+				() => {
 					const idx = disabled.indexOf(d.category);
 					if (idx >= 0) {
 						disabled.splice(idx, 1);
@@ -175,6 +174,7 @@
 					}
 					disabled.push(d.category);
 				}}
+				aria-labelledby={`pie-label-${i}`}
 			/>
 			<Label
 				id={`pie-label-${i}`}
