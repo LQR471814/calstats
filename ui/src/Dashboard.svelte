@@ -5,8 +5,11 @@
 	import { createQuery } from "@tanstack/svelte-query";
 	import Pie from "./visualizers/Pie.svelte";
 	import { getPieData } from "./analysis";
-	import { EventState, IntervalOption } from "./event-state.svelte";
+	import { EventModel, IntervalOption } from "./event-state.svelte";
 	import * as Select from "$lib/components/ui/select";
+	import Button from "$lib/components/ui/button/button.svelte";
+	import Refresh from "@lucide/svelte/icons/refresh-cw";
+	import LoaderCircle from "@lucide/svelte/icons/loader-circle";
 
 	const metaQuery = createQuery({
 		queryKey: ["meta"],
@@ -23,10 +26,10 @@
 		});
 	});
 
-	const state = new EventState();
+	const model = new EventModel();
 
 	const pieData = $derived(
-		state.events ? getPieData(state.interval, state.events) : undefined,
+		model.events ? getPieData(model.interval, model.events) : undefined,
 	);
 
 	const intvOptLabel: { [key in IntervalOption]: string } = {
@@ -42,6 +45,8 @@
 	function padDateDigit(value: number): string {
 		return value.toString().padStart(2, "0");
 	}
+
+	let pressed = $state(false);
 </script>
 
 <main class="flex gap-6 p-6">
@@ -78,23 +83,23 @@
 		<div class="grid gap-3 grid-cols-[min-content_1fr]">
 			<span>From</span>
 			<code>
-				{state.interval.start.year}-{padDateDigit(
-					state.interval.start.month,
-				)}-{padDateDigit(state.interval.start.day)}
+				{model.interval.start.year}-{padDateDigit(
+					model.interval.start.month,
+				)}-{padDateDigit(model.interval.start.day)}
 			</code>
 			<span>To</span>
 			<code>
-				{state.interval.end.year}-{padDateDigit(
-					state.interval.end.month,
-				)}-{padDateDigit(state.interval.end.day)}
+				{model.interval.end.year}-{padDateDigit(
+					model.interval.end.month,
+				)}-{padDateDigit(model.interval.end.day)}
 			</code>
 		</div>
 		<Select.Root
 			type="single"
-			bind:value={state.option as unknown as string}
+			bind:value={model.option as unknown as string}
 		>
 			<Select.Trigger class="w-[180px]">
-				{intvOptLabel[state.option]}
+				{intvOptLabel[model.option]}
 			</Select.Trigger>
 			<Select.Content>
 				{#each Object.keys(IntervalOption) as key}
@@ -107,5 +112,25 @@
 				{/each}
 			</Select.Content>
 		</Select.Root>
+		<div class="flex justify-end">
+			<Button
+				class="w-fit"
+				variant={pressed ? "ghost" : "default"}
+				disabled={pressed}
+				onclick={() => {
+					pressed = true;
+					model.refresh().finally(() => {
+						pressed = false;
+					});
+				}}
+			>
+				{#if pressed}
+					<LoaderCircle class="animate-spin" />
+				{:else}
+					<Refresh />
+				{/if}
+				Refresh
+			</Button>
+		</div>
 	</div>
 </main>

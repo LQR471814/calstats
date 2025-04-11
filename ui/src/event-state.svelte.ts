@@ -19,7 +19,8 @@ export enum IntervalOption {
 	CUSTOM = "CUSTOM",
 }
 
-export class EventState {
+export class EventModel {
+	version = $state(0)
 	option = $state(IntervalOption.THIS_WEEK)
 	customBounds: Interval = $state<Interval>() as Interval
 	events = $state.raw<EventsResponse>()
@@ -124,6 +125,13 @@ export class EventState {
 		}
 
 		$effect(() => {
+			this.interval
+			this.refresh()
+		})
+	}
+
+	refresh(): Promise<void> {
+		return new Promise((resolve, reject) => {
 			toast.promise(
 				() => client.events({
 					interval: {
@@ -131,7 +139,11 @@ export class EventState {
 						end: instantToTimestamp(this.interval.end.toInstant()),
 					},
 				})
-					.then((res) => { this.events = res }),
+					.then((res) => {
+						this.events = res
+						resolve()
+					})
+					.catch(reject),
 				{
 					loading: 'Fetching events...',
 					success: 'Fetch events: Success',
