@@ -4,10 +4,12 @@ import type { Interval } from "./event-state.svelte";
 export class CategoryStat {
 	category: string
 	time: number
+	proportion: number
 
-	constructor(category: string, time: number) {
+	constructor(category: string, time: number, proportion: number) {
 		this.category = category
 		this.time = time
+		this.proportion = proportion
 	}
 
 	formatTime(): string {
@@ -56,16 +58,16 @@ export class CategoryStat {
 	}
 }
 
-export function getPieData(interval: Interval, events: EventsResponse): CategoryStat[] | undefined {
+export function getCategoryStats(interval: Interval, events: EventsResponse): CategoryStat[] | undefined {
 	if (!events) {
 		return
 	}
 
 	let categories: CategoryStat[] = new Array(events.tags.length + 1)
 	for (let i = 0; i < events.tags.length; i++) {
-		categories[i] = new CategoryStat(events.tags[i], 0)
+		categories[i] = new CategoryStat(events.tags[i], 0, 0)
 	}
-	categories[events.tags.length] = new CategoryStat("Unknown", 0)
+	categories[events.tags.length] = new CategoryStat("Unknown", 0, 0)
 
 	// count time spent in each category
 	let countedSeconds = 0
@@ -88,6 +90,11 @@ export function getPieData(interval: Interval, events: EventsResponse): Category
 		seconds: countedSeconds,
 	})
 	categories[events.tags.length].time += untrackedTime.total({ unit: "seconds" })
+
+	const totalSeconds = totalDuration.total({ unit: "seconds" })
+	for (const cat of categories) {
+		cat.proportion = cat.time / totalSeconds
+	}
 
 	// sort categories
 	categories.sort((a, b) => b.time - a.time)

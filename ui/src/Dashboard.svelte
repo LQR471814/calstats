@@ -4,12 +4,13 @@
 	import { toast } from "svelte-sonner";
 	import { createQuery } from "@tanstack/svelte-query";
 	import Pie from "./visualizers/Pie.svelte";
-	import { getPieData } from "./analysis";
+	import { getCategoryStats } from "./analysis";
 	import { EventModel, IntervalOption } from "./event-state.svelte";
 	import * as Select from "$lib/components/ui/select";
 	import Button from "$lib/components/ui/button/button.svelte";
 	import Refresh from "@lucide/svelte/icons/refresh-cw";
 	import LoaderCircle from "@lucide/svelte/icons/loader-circle";
+	import Categories from "./visualizers/Categories.svelte";
 
 	const metaQuery = createQuery({
 		queryKey: ["meta"],
@@ -28,8 +29,10 @@
 
 	const model = new EventModel();
 
-	const pieData = $derived(
-		model.events ? getPieData(model.interval, model.events) : undefined,
+	const catStats = $derived(
+		model.events
+			? getCategoryStats(model.interval, model.events)
+			: undefined,
 	);
 
 	const intvOptLabel: { [key in IntervalOption]: string } = {
@@ -51,7 +54,7 @@
 
 <main class="flex gap-6 p-6">
 	<div class="flex flex-col gap-6 flex-1">
-		<h1>Schedule</h1>
+		<h1>Schedule statistics</h1>
 
 		<div class="grid grid-cols-[min-content_1fr] gap-3 max-w-[400px]">
 			<span>Server</span>
@@ -73,9 +76,12 @@
 			{/if}
 		</div>
 
-		{#if pieData}
-			<Pie data={pieData} />
-		{/if}
+		<div class="flex flex-wrap gap-6">
+			{#if catStats}
+				<Pie data={catStats} />
+				<Categories data={catStats} />
+			{/if}
+		</div>
 	</div>
 
 	<div class="flex flex-col gap-3">
