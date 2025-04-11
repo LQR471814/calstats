@@ -77,9 +77,9 @@
 		</div>
 
 		<div class="flex flex-wrap gap-6">
-			{#if catStats}
+			{#if catStats && model.events}
 				<Pie data={catStats} />
-				<Categories data={catStats} />
+				<Categories data={catStats} ev={model.events} />
 			{/if}
 		</div>
 	</div>
