@@ -50,7 +50,7 @@ export class EventModel {
 			}
 			case IntervalOption.THIS_WEEK: {
 				const start = now.subtract({
-					days: now.dayOfWeek - 1,
+					days: now.dayOfWeek,
 					hours: now.hour,
 					minutes: now.minute,
 					seconds: now.second,
@@ -58,7 +58,7 @@ export class EventModel {
 					nanoseconds: now.nanosecond,
 				});
 				const end = start.add({
-					days: now.daysInWeek,
+					days: now.daysInWeek - 1,
 				});
 				return { start, end };
 			}
@@ -143,7 +143,10 @@ export class EventModel {
 						this.events = res
 						resolve()
 					})
-					.catch(reject),
+					.catch((err) => {
+						reject(err)
+						throw err
+					}),
 				{
 					loading: 'Fetching events...',
 					success: 'Fetch events: Success',

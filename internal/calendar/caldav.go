@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
+	"schedule-statistics/internal/tel"
 	"strconv"
 	"strings"
 	"time"
@@ -345,6 +346,32 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 
 			duration := end.Sub(start)
 
+			exceptions := e.Props.Get(ical.PropExceptionDates)
+			var tzId string
+			var exlist []time.Time
+			if exceptions != nil {
+				tzId = exceptions.Params.Get(ical.PropTimezoneID)
+				var tz *time.Location
+				if tzId != "" {
+					tz, err = time.LoadLocation(tzId)
+					if err != nil {
+						return nil, wrapEventsErr(err)
+					}
+				}
+
+				datetime, err := exceptions.DateTime(tz)
+				if err != nil {
+					return nil, wrapEventsErr(err)
+				}
+				exlist = append(exlist, datetime)
+			}
+
+			// ignore events that are part of a recurrence
+			recurId := e.Props.Get(ical.PropRecurrenceID)
+			if recurId != nil {
+				continue
+			}
+
 			recurrence := e.Props.Get(ical.PropRecurrenceRule)
 			if recurrence != nil {
 				// recurring event
@@ -359,7 +386,14 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 				if err != nil {
 					return nil, wrapEventsErr(err)
 				}
+			recur:
 				for _, recurTime := range rule.All() {
+					for _, e := range exlist {
+						if e.Equal(recurTime) {
+							tel.Log.Debug("caldav", "skipped exception", "event", name)
+							continue recur
+						}
+					}
 					out = append(out, Event{
 						Name:  name,
 						Tags:  tags,

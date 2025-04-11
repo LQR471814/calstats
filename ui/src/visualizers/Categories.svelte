@@ -11,6 +11,7 @@
 	<h3>Categories</h3>
 	<div class="flex flex-col gap-2">
 		{#each data as d}
+		{#if d.proportion > 0}
 			<div
 				class="rounded-lg px-2 py-1"
 				style:background-color={color(d.category)}
@@ -21,6 +22,7 @@
 					{d.formatTime()} ({Math.round(d.proportion * 1000) / 10}%)
 				</span>
 			</div>
+			{/if}
 		{/each}
 	</div>
 </div>

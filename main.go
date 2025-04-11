@@ -13,6 +13,7 @@ import (
 	"slices"
 	"time"
 
+	"connectrpc.com/connect"
 	connectcors "connectrpc.com/cors"
 	"github.com/rs/cors"
 	"github.com/titanous/json5"
@@ -138,11 +139,16 @@ func main() {
 	tel.Log.Info("main", "listening to gRPC...", "port", *port)
 
 	mux := http.NewServeMux()
-	handle, handler := v1connect.NewCalendarServiceHandler(CalendarService{
-		calendars:      cfg.Calendars,
-		calendarServer: cfg.Server.Url,
-		source:         source,
-	})
+	handle, handler := v1connect.NewCalendarServiceHandler(
+		CalendarService{
+			calendars:      cfg.Calendars,
+			calendarServer: cfg.Server.Url,
+			source:         source,
+		},
+		connect.WithInterceptors(
+			connect.UnaryInterceptorFunc(tel.LogErrorsInterceptor),
+		),
+	)
 	mux.Handle(handle, withCORS(handler))
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", *port),
