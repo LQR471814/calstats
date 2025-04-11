@@ -24,7 +24,7 @@ export class EventState {
 	customBounds: Interval = $state<Interval>() as Interval
 	events = $state.raw<EventsResponse>()
 
-	private interval: Interval = $derived.by((): Interval => {
+	interval: Interval = $derived.by((): Interval => {
 		const now = Temporal.Now.zonedDateTimeISO();
 
 		switch (this.option) {

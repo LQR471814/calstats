@@ -26,7 +26,7 @@
 	const state = new EventState();
 
 	const pieData = $derived(
-		state.events ? getPieData(state.events) : undefined,
+		state.events ? getPieData(state.interval, state.events) : undefined,
 	);
 
 	const intvOptLabel: { [key in IntervalOption]: string } = {
@@ -38,6 +38,10 @@
 		[IntervalOption.LAST_6_MONTHS]: "Last 6 months",
 		[IntervalOption.CUSTOM]: "Custom",
 	};
+
+	function padDateDigit(value: number): string {
+		return value.toString().padStart(2, "0");
+	}
 </script>
 
 <main class="flex gap-6 p-6">
@@ -71,6 +75,20 @@
 
 	<div class="flex flex-col gap-3">
 		<h4>Analysis interval</h4>
+		<div class="grid gap-3 grid-cols-[min-content_1fr]">
+			<span>From</span>
+			<code>
+				{state.interval.start.year}-{padDateDigit(
+					state.interval.start.month,
+				)}-{padDateDigit(state.interval.start.day)}
+			</code>
+			<span>To</span>
+			<code>
+				{state.interval.end.year}-{padDateDigit(
+					state.interval.end.month,
+				)}-{padDateDigit(state.interval.end.day)}
+			</code>
+		</div>
 		<Select.Root
 			type="single"
 			bind:value={state.option as unknown as string}
