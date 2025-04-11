@@ -33,5 +33,7 @@ export function getPieData(events: EventsResponse): PieData | undefined {
 			events.tags.length].time += Number(e.duration.seconds)
 	}
 
+	categories.sort((a, b) => b.time - a.time)
+
 	return categories
 }
