@@ -167,7 +167,7 @@
 				style={`border-color: ${c}; background-color: ${checked ? c : "transparent"}`}
 				{checked}
 				aria-labelledby={`pie-label-${i}`}
-				on:click={() => {
+				onclick={() => {
 					const idx = disabled.indexOf(d.category);
 					if (idx >= 0) {
 						disabled.splice(idx, 1);

@@ -10,13 +10,13 @@ export type Interval = {
 };
 
 export enum IntervalOption {
-	THIS_DAY = 0,
-	THIS_WEEK = 1,
-	THIS_MONTH = 2,
-	THIS_YEAR = 3,
-	LAST_3_MONTHS = 4,
-	LAST_6_MONTHS = 5,
-	CUSTOM = 6,
+	THIS_DAY = "THIS_DAY",
+	THIS_WEEK = "THIS_WEEK",
+	THIS_MONTH = "THIS_MONTH",
+	THIS_YEAR = "THIS_YEAR",
+	LAST_3_MONTHS = "LAST_3_MONTHS",
+	LAST_6_MONTHS = "LAST_6_MONTHS",
+	CUSTOM = "CUSTOM",
 }
 
 export class EventState {

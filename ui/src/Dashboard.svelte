@@ -72,30 +72,20 @@
 	<div class="flex flex-col gap-3">
 		<h4>Analysis interval</h4>
 		<Select.Root
-			selected={{
-				value: state.option,
-				label: intvOptLabel[state.option],
-			}}
-			onSelectedChange={(e) => {
-				if (!e) {
-					return;
-				}
-				state.option = e.value;
-			}}
+			type="single"
+			bind:value={state.option as unknown as string}
 		>
 			<Select.Trigger class="w-[180px]">
-				<Select.Value />
+				{intvOptLabel[state.option]}
 			</Select.Trigger>
 			<Select.Content>
 				{#each Object.keys(IntervalOption) as key}
-					{#if typeof IntervalOption[key as keyof typeof IntervalOption] === "number"}
-						{@const value =
-							IntervalOption[key as keyof typeof IntervalOption]}
-						{@const label = intvOptLabel[value]}
-						<Select.Item {value} {label}>
-							{label}
-						</Select.Item>
-					{/if}
+					{@const value =
+						IntervalOption[key as keyof typeof IntervalOption]}
+					{@const label = intvOptLabel[value]}
+					<Select.Item value={value as unknown as string} {label}>
+						{label}
+					</Select.Item>
 				{/each}
 			</Select.Content>
 		</Select.Root>
