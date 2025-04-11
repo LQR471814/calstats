@@ -19,24 +19,17 @@ export enum IntervalOption {
 	CUSTOM = 6,
 }
 
-export function createEventState() {
-	const now = Temporal.Now.zonedDateTimeISO();
+export class EventState {
+	option = $state(IntervalOption.THIS_WEEK)
+	customBounds: Interval = $state<Interval>() as Interval
+	events = $state.raw<EventsResponse>()
 
-	const interval = $state<{
-		custom: Interval
-		option: IntervalOption
-	}>({
-		option: IntervalOption.THIS_WEEK,
-		custom: {
-			start: now.subtract({ weeks: 1 }),
-			end: now.add({ weeks: 1 }),
-		}
-	});
+	private interval: Interval = $derived.by((): Interval => {
+		const now = Temporal.Now.zonedDateTimeISO();
 
-	const _interval = $derived.by((): Interval => {
-		switch (interval.option) {
+		switch (this.option) {
 			case IntervalOption.CUSTOM:
-				return interval.custom;
+				return this.customBounds;
 			case IntervalOption.THIS_DAY: {
 				const start = now.subtract({
 					hours: now.hour,
@@ -121,28 +114,33 @@ export function createEventState() {
 				return { start, end };
 			}
 		}
-	});
-
-	const events = $state<{ response?: EventsResponse }>({ response: undefined })
-
-	$effect(() => {
-		client.events({
-			interval: {
-				start: instantToTimestamp(_interval.start.toInstant()),
-				end: instantToTimestamp(_interval.end.toInstant()),
-			},
-		})
-			.then((res) => {
-				events.response = res
-			})
-			.catch(err => {
-				toast.error("RPC Error", {
-					description: String(err),
-					duration: 3000,
-				})
-			})
 	})
 
-	return { interval, events }
+	constructor() {
+		const now = Temporal.Now.zonedDateTimeISO();
+		this.customBounds = {
+			start: now.subtract({ weeks: 1 }),
+			end: now.add({ weeks: 1 }),
+		}
+
+		$effect(() => {
+			toast.promise(
+				() => client.events({
+					interval: {
+						start: instantToTimestamp(this.interval.start.toInstant()),
+						end: instantToTimestamp(this.interval.end.toInstant()),
+					},
+				})
+					.then((res) => { this.events = res }),
+				{
+					loading: 'Fetching events...',
+					success: 'Fetch events: Success',
+					error: 'Fetch events: Error',
+					dismissable: true,
+					duration: 500,
+				}
+			)
+		})
+	}
 }
 

@@ -5,11 +5,8 @@
 	import { createQuery } from "@tanstack/svelte-query";
 	import Pie from "./visualizers/Pie.svelte";
 	import { getPieData } from "./analysis";
-	import { createEventState, IntervalOption } from "./event-state.svelte";
-	import { CalendarDate } from "@internationalized/date";
+	import { EventState, IntervalOption } from "./event-state.svelte";
 	import * as Select from "$lib/components/ui/select";
-
-	const { interval, events } = createEventState();
 
 	const metaQuery = createQuery({
 		queryKey: ["meta"],
@@ -26,9 +23,21 @@
 		});
 	});
 
+	const state = new EventState();
+
 	const pieData = $derived(
-		events.response ? getPieData(events.response) : undefined,
+		state.events ? getPieData(state.events) : undefined,
 	);
+
+	const intvOptLabel: { [key in IntervalOption]: string } = {
+		[IntervalOption.THIS_DAY]: "Today",
+		[IntervalOption.THIS_WEEK]: "This week",
+		[IntervalOption.THIS_MONTH]: "This month",
+		[IntervalOption.THIS_YEAR]: "This year",
+		[IntervalOption.LAST_3_MONTHS]: "Last 3 months",
+		[IntervalOption.LAST_6_MONTHS]: "Last 6 months",
+		[IntervalOption.CUSTOM]: "Custom",
+	};
 </script>
 
 <main class="flex gap-6 p-6">
@@ -60,50 +69,34 @@
 		{/if}
 	</div>
 
-	<div>
-		<Select.Root>
-			<Select.Trigger
-				class="w-[180px]"
-				value={interval.option}
-				onchange={(e) => {
-					console.log("changed to", e.currentTarget.value);
-				}}
-			>
+	<div class="flex flex-col gap-3">
+		<h4>Analysis interval</h4>
+		<Select.Root
+			selected={{
+				value: state.option,
+				label: intvOptLabel[state.option],
+			}}
+			onSelectedChange={(e) => {
+				if (!e) {
+					return;
+				}
+				state.option = e.value;
+			}}
+		>
+			<Select.Trigger class="w-[180px]">
 				<Select.Value />
 			</Select.Trigger>
 			<Select.Content>
-				<Select.Label>Analysis Interval</Select.Label>
-
-				<Select.Item value={IntervalOption.THIS_DAY} label="Today">
-					Today
-				</Select.Item>
-				<Select.Item value={IntervalOption.THIS_WEEK} label="This week">
-					This week
-				</Select.Item>
-				<Select.Item
-					value={IntervalOption.THIS_MONTH}
-					label="This month"
-				>
-					This month
-				</Select.Item>
-				<Select.Item value={IntervalOption.THIS_YEAR} label="This year">
-					This year
-				</Select.Item>
-				<Select.Item
-					value={IntervalOption.LAST_3_MONTHS}
-					label="Last 3 months"
-				>
-					Last 3 months
-				</Select.Item>
-				<Select.Item
-					value={IntervalOption.LAST_6_MONTHS}
-					label="Last 6 months"
-				>
-					Last 6 months
-				</Select.Item>
-				<Select.Item value={IntervalOption.CUSTOM} label="Custom">
-					Custom
-				</Select.Item>
+				{#each Object.keys(IntervalOption) as key}
+					{#if typeof IntervalOption[key as keyof typeof IntervalOption] === "number"}
+						{@const value =
+							IntervalOption[key as keyof typeof IntervalOption]}
+						{@const label = intvOptLabel[value]}
+						<Select.Item {value} {label}>
+							{label}
+						</Select.Item>
+					{/if}
+				{/each}
 			</Select.Content>
 		</Select.Root>
 	</div>

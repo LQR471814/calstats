@@ -32,6 +32,51 @@
 	let label = $state<string>();
 	let percent = $state<number>();
 	let duration = $state<number>();
+
+	function formatDuration(duration: number) {
+		const out: string[] = [];
+
+		const years = Math.floor(duration / 31_536_000);
+		const yearsR = duration % 31_536_000;
+		if (years > 1) {
+			out.push(`${years} years`);
+		} else if (years === 1) {
+			out.push(`${years} year`);
+		}
+
+		const weeks = Math.floor(yearsR / 604_800);
+		const weeksR = duration % 604_800;
+		if (weeks > 1) {
+			out.push(`${weeks} weeks`);
+		} else if (weeks === 1) {
+			out.push(`${weeks} week`);
+		}
+
+		const days = Math.floor(weeksR / 86_400);
+		const daysR = duration % 86400;
+		if (days > 1) {
+			out.push(`${days} days`);
+		} else if (days === 1) {
+			out.push(`${days} day`);
+		}
+
+		const hours = Math.floor(daysR / 3_600);
+		const hoursR = duration % 3600;
+		if (hours > 1) {
+			out.push(`${hours} hours`);
+		} else if (hours === 1) {
+			out.push(`${hours} hour`);
+		}
+
+		const minutes = Math.floor(hoursR / 60);
+		if (minutes > 1) {
+			out.push(`${minutes} minutes`);
+		} else if (minutes === 1) {
+			out.push(`${minutes} minute`);
+		}
+
+		return out.slice(0, 2).join(" ");
+	}
 </script>
 
 <h3>Pie chart</h3>
@@ -83,58 +128,31 @@
 	</g>
 
 	<text
-		class="font-bold text-lg"
+		class="font-bold text-lg pointer-events-none"
 		text-anchor="middle"
 		fill="currentColor"
 		dy="-1em"
 	>
 		{label}
 	</text>
-	<text text-anchor="middle" fill="currentColor" dy="0.2em">
+	<text
+		class="pointer-events-none"
+		text-anchor="middle"
+		fill="currentColor"
+		dy="0.2em"
+	>
 		{#if percent !== undefined}
 			{Math.round(percent * 1000) / 10}%
 		{/if}
 	</text>
-	<text text-anchor="middle" fill="currentColor" dy="1.4em">
+	<text
+		class="pointer-events-none"
+		text-anchor="middle"
+		fill="currentColor"
+		dy="1.4em"
+	>
 		{#if duration !== undefined}
-			{@const years = Math.floor(duration / 31_536_000)}
-			{@const yearsR = duration % 31_536_000}
-			{#if years > 1}
-				{years} years
-			{:else if years === 1}
-				{years} year
-			{/if}
-
-			{@const weeks = Math.floor(yearsR / 604_800)}
-			{@const weeksR = duration % 604_800}
-			{#if weeks > 1}
-				{weeks} weeks
-			{:else if weeks === 1}
-				{weeks} week
-			{/if}
-
-			{@const days = Math.floor(weeksR / 86_400)}
-			{@const daysR = duration % 86400}
-			{#if days > 1}
-				{days} days
-			{:else if days === 1}
-				{days} day
-			{/if}
-
-			{@const hours = Math.floor(daysR / 3_600)}
-			{@const hoursR = duration % 3600}
-			{#if hours > 1}
-				{hours} hours
-			{:else if hours === 1}
-				{hours} hour
-			{/if}
-
-			{@const minutes = Math.floor(hoursR / 60)}
-			{#if minutes > 1}
-				{minutes} minutes
-			{:else if minutes === 1}
-				{minutes} minute
-			{/if}
+			{formatDuration(duration)}
 		{/if}
 	</text>
 </svg>
