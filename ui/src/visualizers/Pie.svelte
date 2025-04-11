@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { CategoryStat } from "../analysis";
+	import { formatDuration, type CategoryStat } from "../analysis";
 	import { Checkbox } from "$lib/components/ui/checkbox";
 	import { Label } from "$lib/components/ui/label";
 	import * as d3 from "d3";
@@ -107,7 +107,7 @@
 			dy="1.4em"
 		>
 			{#if stat !== undefined}
-				{stat.formatTime()}
+				{formatDuration(stat.time)}
 			{/if}
 		</text>
 	</svg>

@@ -10,7 +10,7 @@
 	import Button from "$lib/components/ui/button/button.svelte";
 	import Refresh from "@lucide/svelte/icons/refresh-cw";
 	import LoaderCircle from "@lucide/svelte/icons/loader-circle";
-	import Categories from "./visualizers/Categories.svelte";
+	import List from "./visualizers/List.svelte";
 
 	const metaQuery = createQuery({
 		queryKey: ["meta"],
@@ -52,8 +52,8 @@
 	let pressed = $state(false);
 </script>
 
-<main class="flex gap-6 p-6">
-	<div class="flex flex-col gap-6 flex-1">
+<main class="flex gap-6 px-6">
+	<div class="flex flex-col gap-6 flex-1 py-6">
 		<h1>Schedule statistics</h1>
 
 		<div class="grid grid-cols-[min-content_1fr] gap-3 max-w-[400px]">
@@ -79,64 +79,66 @@
 		<div class="flex flex-wrap gap-6">
 			{#if catStats && model.events}
 				<Pie data={catStats} />
-				<Categories data={catStats} ev={model.events} />
+				<List data={catStats} ev={model.events} />
 			{/if}
 		</div>
 	</div>
 
-	<div class="flex flex-col gap-3">
-		<h4>Analysis interval</h4>
-		<div class="grid gap-3 grid-cols-[min-content_1fr]">
-			<span>From</span>
-			<code>
-				{model.interval.start.year}-{padDateDigit(
-					model.interval.start.month,
-				)}-{padDateDigit(model.interval.start.day)}
-			</code>
-			<span>To</span>
-			<code>
-				{model.interval.end.year}-{padDateDigit(
-					model.interval.end.month,
-				)}-{padDateDigit(model.interval.end.day)}
-			</code>
-		</div>
-		<Select.Root
-			type="single"
-			bind:value={model.option as unknown as string}
-		>
-			<Select.Trigger class="w-[180px]">
-				{intvOptLabel[model.option]}
-			</Select.Trigger>
-			<Select.Content>
-				{#each Object.keys(IntervalOption) as key}
-					{@const value =
-						IntervalOption[key as keyof typeof IntervalOption]}
-					{@const label = intvOptLabel[value]}
-					<Select.Item value={value as unknown as string} {label}>
-						{label}
-					</Select.Item>
-				{/each}
-			</Select.Content>
-		</Select.Root>
-		<div class="flex justify-end">
-			<Button
-				class="w-fit"
-				variant={pressed ? "ghost" : "default"}
-				disabled={pressed}
-				onclick={() => {
-					pressed = true;
-					model.refresh().finally(() => {
-						pressed = false;
-					});
-				}}
+	<div>
+		<div class="flex flex-col gap-3 top-0 sticky py-6">
+			<h4>Analysis interval</h4>
+			<div class="grid gap-3 grid-cols-[min-content_1fr]">
+				<span>From</span>
+				<code>
+					{model.interval.start.year}-{padDateDigit(
+						model.interval.start.month,
+					)}-{padDateDigit(model.interval.start.day)}
+				</code>
+				<span>To</span>
+				<code>
+					{model.interval.end.year}-{padDateDigit(
+						model.interval.end.month,
+					)}-{padDateDigit(model.interval.end.day)}
+				</code>
+			</div>
+			<Select.Root
+				type="single"
+				bind:value={model.option as unknown as string}
 			>
-				{#if pressed}
-					<LoaderCircle class="animate-spin" />
-				{:else}
-					<Refresh />
-				{/if}
-				Refresh
-			</Button>
+				<Select.Trigger class="w-[180px]">
+					{intvOptLabel[model.option]}
+				</Select.Trigger>
+				<Select.Content>
+					{#each Object.keys(IntervalOption) as key}
+						{@const value =
+							IntervalOption[key as keyof typeof IntervalOption]}
+						{@const label = intvOptLabel[value]}
+						<Select.Item value={value as unknown as string} {label}>
+							{label}
+						</Select.Item>
+					{/each}
+				</Select.Content>
+			</Select.Root>
+			<div class="flex justify-end">
+				<Button
+					class="w-fit"
+					variant={pressed ? "ghost" : "default"}
+					disabled={pressed}
+					onclick={() => {
+						pressed = true;
+						model.refresh().finally(() => {
+							pressed = false;
+						});
+					}}
+				>
+					{#if pressed}
+						<LoaderCircle class="animate-spin" />
+					{:else}
+						<Refresh />
+					{/if}
+					Refresh
+				</Button>
+			</div>
 		</div>
 	</div>
 </main>

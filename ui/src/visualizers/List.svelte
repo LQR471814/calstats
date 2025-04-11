@@ -3,7 +3,6 @@
 	import * as d3 from "d3";
 	import ArrowDown from "@lucide/svelte/icons/chevron-down";
 	import type { EventsResponse } from "$api/api_pb";
-	import { fly } from "svelte/transition";
 	import { cn } from "$lib/utils";
 
 	const color = d3.scaleOrdinal(d3.schemeObservable10);
@@ -26,8 +25,6 @@
 		class="rounded-lg px-2 py-1"
 		style:background-color={color}
 		style:width={`${proportion * normalizeFactor * 100}%`}
-		in:fly={{ y: -10 }}
-		out:fly={{ y: 10, duration: 300 }}
 	>
 		<p class="text-sm text-nowrap">{name}</p>
 		<span class="text-sm text-nowrap">
@@ -37,7 +34,7 @@
 {/snippet}
 
 <div class="flex flex-col gap-6 w-[300px]">
-	<h3>Categories</h3>
+	<h3>List</h3>
 	<div class="flex flex-col gap-2">
 		{#each data.filter((d) => d.proportion > 0) as d}
 			{@const catColor = color(d.category)}
