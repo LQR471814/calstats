@@ -329,6 +329,16 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 				return nil, wrapEventsErr(err)
 			}
 
+			if end.Before(intvStart) || start.After(intvEnd) {
+				continue
+			}
+			if start.Before(intvStart) {
+				start = intvStart
+			}
+			if end.After(intvEnd) {
+				end = intvEnd
+			}
+
 			name := ""
 			nameProp := e.Props.Get(ical.PropSummary)
 			if nameProp != nil {
@@ -364,12 +374,6 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 					return nil, wrapEventsErr(err)
 				}
 				exlist = append(exlist, datetime)
-			}
-
-			// ignore events that are part of a recurrence
-			recurId := e.Props.Get(ical.PropRecurrenceID)
-			if recurId != nil {
-				continue
 			}
 
 			recurrence := e.Props.Get(ical.PropRecurrenceRule)
