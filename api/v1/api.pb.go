@@ -238,6 +238,7 @@ func (x *CalendarResponse) GetNames() []string {
 type EventsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Interval      *Interval              `protobuf:"bytes,1,opt,name=interval,proto3" json:"interval,omitempty"`
+	Timezone      string                 `protobuf:"bytes,2,opt,name=timezone,proto3" json:"timezone,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -277,6 +278,13 @@ func (x *EventsRequest) GetInterval() *Interval {
 		return x.Interval
 	}
 	return nil
+}
+
+func (x *EventsRequest) GetTimezone() string {
+	if x != nil {
+		return x.Timezone
+	}
+	return ""
 }
 
 type EventsResponse struct {
@@ -355,9 +363,10 @@ const file_v1_api_proto_rawDesc = "" +
 	"\x0fCalendarRequest\"Q\n" +
 	"\x10CalendarResponse\x12'\n" +
 	"\x0fcalendar_server\x18\x01 \x01(\tR\x0ecalendarServer\x12\x14\n" +
-	"\x05names\x18\x02 \x03(\tR\x05names\"6\n" +
+	"\x05names\x18\x02 \x03(\tR\x05names\"R\n" +
 	"\rEventsRequest\x12%\n" +
-	"\binterval\x18\x01 \x01(\v2\t.IntervalR\binterval\"e\n" +
+	"\binterval\x18\x01 \x01(\v2\t.IntervalR\binterval\x12\x1a\n" +
+	"\btimezone\x18\x02 \x01(\tR\btimezone\"e\n" +
 	"\x0eEventsResponse\x12\x1f\n" +
 	"\vevent_names\x18\x01 \x03(\tR\n" +
 	"eventNames\x12\x12\n" +

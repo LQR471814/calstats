@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file v1/api.proto.
  */
 export const file_v1_api: GenFile = /*@__PURE__*/
-  fileDesc("Cgx2MS9hcGkucHJvdG8iXgoISW50ZXJ2YWwSKQoFc3RhcnQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEicKA2VuZBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAibQoFRXZlbnQSDAoEbmFtZRgBIAEoDRIMCgR0YWdzGAIgAygNEhsKCGludGVydmFsGAMgASgLMgkuSW50ZXJ2YWwSKwoIZHVyYXRpb24YBCABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24iEQoPQ2FsZW5kYXJSZXF1ZXN0IjoKEENhbGVuZGFyUmVzcG9uc2USFwoPY2FsZW5kYXJfc2VydmVyGAEgASgJEg0KBW5hbWVzGAIgAygJIiwKDUV2ZW50c1JlcXVlc3QSGwoIaW50ZXJ2YWwYASABKAsyCS5JbnRlcnZhbCJLCg5FdmVudHNSZXNwb25zZRITCgtldmVudF9uYW1lcxgBIAMoCRIMCgR0YWdzGAIgAygJEhYKBmV2ZW50cxgDIAMoCzIGLkV2ZW50Mm0KD0NhbGVuZGFyU2VydmljZRIvCghDYWxlbmRhchIQLkNhbGVuZGFyUmVxdWVzdBoRLkNhbGVuZGFyUmVzcG9uc2USKQoGRXZlbnRzEg4uRXZlbnRzUmVxdWVzdBoPLkV2ZW50c1Jlc3BvbnNlYgZwcm90bzM", [file_google_protobuf_timestamp, file_google_protobuf_duration]);
+  fileDesc("Cgx2MS9hcGkucHJvdG8iXgoISW50ZXJ2YWwSKQoFc3RhcnQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEicKA2VuZBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAibQoFRXZlbnQSDAoEbmFtZRgBIAEoDRIMCgR0YWdzGAIgAygNEhsKCGludGVydmFsGAMgASgLMgkuSW50ZXJ2YWwSKwoIZHVyYXRpb24YBCABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24iEQoPQ2FsZW5kYXJSZXF1ZXN0IjoKEENhbGVuZGFyUmVzcG9uc2USFwoPY2FsZW5kYXJfc2VydmVyGAEgASgJEg0KBW5hbWVzGAIgAygJIj4KDUV2ZW50c1JlcXVlc3QSGwoIaW50ZXJ2YWwYASABKAsyCS5JbnRlcnZhbBIQCgh0aW1lem9uZRgCIAEoCSJLCg5FdmVudHNSZXNwb25zZRITCgtldmVudF9uYW1lcxgBIAMoCRIMCgR0YWdzGAIgAygJEhYKBmV2ZW50cxgDIAMoCzIGLkV2ZW50Mm0KD0NhbGVuZGFyU2VydmljZRIvCghDYWxlbmRhchIQLkNhbGVuZGFyUmVxdWVzdBoRLkNhbGVuZGFyUmVzcG9uc2USKQoGRXZlbnRzEg4uRXZlbnRzUmVxdWVzdBoPLkV2ZW50c1Jlc3BvbnNlYgZwcm90bzM", [file_google_protobuf_timestamp, file_google_protobuf_duration]);
 
 /**
  * @generated from message Interval
@@ -119,6 +119,11 @@ export type EventsRequest = Message<"EventsRequest"> & {
    * @generated from field: Interval interval = 1;
    */
   interval?: Interval;
+
+  /**
+   * @generated from field: string timezone = 2;
+   */
+  timezone: string;
 };
 
 /**

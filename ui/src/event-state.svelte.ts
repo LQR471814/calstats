@@ -19,6 +19,14 @@ export enum IntervalOption {
 	CUSTOM = "CUSTOM",
 }
 
+const full_day = {
+	hours: 23,
+	minutes: 59,
+	seconds: 59,
+	milliseconds: 999,
+	nanoseconds: 999,
+}
+
 export class EventModel {
 	version = $state(0)
 	option = $state(IntervalOption.THIS_WEEK)
@@ -39,13 +47,7 @@ export class EventModel {
 					milliseconds: now.millisecond,
 					nanoseconds: now.nanosecond,
 				});
-				const end = start.add({
-					hours: 23,
-					minutes: 59,
-					seconds: 59,
-					milliseconds: 999,
-					nanoseconds: 999,
-				});
+				const end = start.add(full_day);
 				return { start, end };
 			}
 			case IntervalOption.THIS_WEEK: {
@@ -59,6 +61,7 @@ export class EventModel {
 				});
 				const end = start.add({
 					days: now.daysInWeek - 1,
+					...full_day,
 				});
 				return { start, end };
 			}
@@ -73,6 +76,7 @@ export class EventModel {
 				});
 				const end = start.add({
 					months: 1,
+					...full_day,
 				});
 				return { start, end };
 			}
@@ -87,6 +91,7 @@ export class EventModel {
 				});
 				const end = start.add({
 					years: 1,
+					...full_day,
 				});
 				return { start, end };
 			}
@@ -134,6 +139,7 @@ export class EventModel {
 		return new Promise((resolve, reject) => {
 			toast.promise(
 				() => client.events({
+					timezone: Temporal.Now.timeZoneId(),
 					interval: {
 						start: instantToTimestamp(this.interval.start.toInstant()),
 						end: instantToTimestamp(this.interval.end.toInstant()),
@@ -141,6 +147,24 @@ export class EventModel {
 				})
 					.then((res) => {
 						this.events = res
+						console.table(
+							res.events.map((e) => {
+								const startTime = Temporal.Instant
+									.fromEpochMilliseconds(Number(e.interval!.start!.seconds) * 1000)
+									.toZonedDateTimeISO(Temporal.Now.timeZoneId())
+
+								const endTime = Temporal.Instant
+									.fromEpochMilliseconds(Number(e.interval!.end!.seconds) * 1000)
+									.toZonedDateTimeISO(Temporal.Now.timeZoneId())
+
+								return {
+									name: res.eventNames[e.name],
+									tag: e.tags.map((t) => res.tags[t])[0],
+									startTime: `${startTime.year}-${startTime.month}-${startTime.day} ${startTime.hour}`,
+									endTime: `${endTime.year}-${endTime.month}-${endTime.day} ${endTime.hour}`
+								}
+							})
+						)
 						resolve()
 					})
 					.catch((err) => {

@@ -68,10 +68,15 @@ func printCal(ctx context.Context, source calendar.Source, calname string) error
 	}
 
 	now := time.Now()
-	start := now.AddDate(0, -1, 0)
-	end := now.AddDate(0, 1, 0)
 
-	events, err := source.Events(ctx, cal, start, end)
+	start := now.Add(-time.Duration(now.Hour()) * time.Hour)
+	start = start.Add(-time.Duration(now.Minute()) * time.Minute)
+	start = start.Add(-time.Duration(now.Second()) * time.Second)
+	start = start.Add(-time.Duration(now.Nanosecond()) * time.Nanosecond)
+
+	end := start.Add(time.Hour*23 + time.Minute*59 + time.Second*59 + time.Nanosecond*999999999)
+
+	events, err := source.Events(ctx, cal, start, end, time.Local)
 	if err != nil {
 		return err
 	}
@@ -84,8 +89,8 @@ func printCal(ctx context.Context, source calendar.Source, calname string) error
 			"main",
 			"EVENT",
 			"name", e.Name,
-			"start", e.Start.Format(time.RFC1123),
-			"end", e.End.Format(time.RFC1123),
+			"start", e.Start.In(time.Local).Format(time.RFC1123),
+			"end", e.End.In(time.Local).Format(time.RFC1123),
 			"tags", e.Tags,
 		)
 	}

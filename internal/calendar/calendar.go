@@ -31,5 +31,5 @@ type Calendar struct {
 
 type Source interface {
 	Calendars(ctx context.Context) ([]Calendar, error)
-	Events(ctx context.Context, calendar Calendar, start, end time.Time) ([]Event, error)
+	Events(ctx context.Context, calendar Calendar, start, end time.Time, tz *time.Location) ([]Event, error)
 }

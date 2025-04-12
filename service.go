@@ -7,6 +7,7 @@ import (
 	v1 "schedule-statistics/api/v1"
 	"schedule-statistics/internal/calendar"
 	"slices"
+	"time"
 
 	"connectrpc.com/connect"
 	"google.golang.org/protobuf/types/known/durationpb"
@@ -142,11 +143,18 @@ func (s CalendarService) Events(ctx context.Context, req *connect.Request[v1.Eve
 
 	var eventList []calendar.Event
 
+	tzId := req.Msg.Timezone
+	tz, err := time.LoadLocation(tzId)
+	if err != nil {
+		return nil, fmt.Errorf("load timezone: %w", err)
+	}
+
 	for _, c := range cals {
 		events, err := s.source.Events(
 			ctx, c,
 			req.Msg.Interval.Start.AsTime(),
 			req.Msg.Interval.End.AsTime(),
+			tz,
 		)
 		if err != nil {
 			return nil, err

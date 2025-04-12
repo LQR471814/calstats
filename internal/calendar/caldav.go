@@ -287,57 +287,22 @@ func wrapEventsErr(err error) error {
 	return fmt.Errorf("get events: %w", err)
 }
 
-func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEnd time.Time) ([]Event, error) {
-	query := &caldav.CalendarQuery{
-		CompFilter: caldav.CompFilter{
-			Name: "VCALENDAR",
-			Comps: []caldav.CompFilter{{
-				Name:  "VEVENT",
-				Start: intvStart,
-				End:   intvEnd,
-			}},
-		},
-		CompRequest: caldav.CalendarCompRequest{
-			Name: "VCALENDAR",
-			Comps: []caldav.CalendarCompRequest{{
-				Name: "VEVENT",
-				Props: []string{
-					"SUMMARY",
-					"UID",
-					"DTSTART",
-					"DTEND",
-					"DURATION",
-				},
-			}},
-		},
-	}
+type caldavEvent struct {
+	Uid        string
+	Name       string
+	Categories []string
+	ExDates    []time.Time
+	Start, End time.Time
+	Duration   time.Duration
+	RRule      rrule.ROption
+	RId        string
+}
 
-	events, err := c.client.QueryCalendar(ctx, calendar.Id, query)
-	if err != nil {
-		return nil, wrapEventsErr(err)
-	}
-
-	var out []Event
-	for _, eobj := range events {
+func (c Caldav) parseEvents(objs []caldav.CalendarObject, tz *time.Location) ([]caldavEvent, error) {
+	var events []caldavEvent
+	for _, eobj := range objs {
 		for _, e := range eobj.Data.Events() {
-			start, err := e.DateTimeStart(time.Local)
-			if err != nil {
-				return nil, wrapEventsErr(err)
-			}
-			end, err := e.DateTimeEnd(time.Local)
-			if err != nil {
-				return nil, wrapEventsErr(err)
-			}
-
-			if end.Before(intvStart) || start.After(intvEnd) {
-				continue
-			}
-			if start.Before(intvStart) {
-				start = intvStart
-			}
-			if end.After(intvEnd) {
-				end = intvEnd
-			}
+			var err error
 
 			name := ""
 			nameProp := e.Props.Get(ical.PropSummary)
@@ -354,13 +319,20 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 				}
 			}
 
+			start, err := e.DateTimeStart(tz)
+			if err != nil {
+				return nil, wrapEventsErr(err)
+			}
+			end, err := e.DateTimeEnd(tz)
+			if err != nil {
+				return nil, wrapEventsErr(err)
+			}
 			duration := end.Sub(start)
 
 			exceptions := e.Props.Get(ical.PropExceptionDates)
-			var tzId string
 			var exlist []time.Time
 			if exceptions != nil {
-				tzId = exceptions.Params.Get(ical.PropTimezoneID)
+				tzId := exceptions.Params.Get(ical.PropTimezoneID)
 				var tz *time.Location
 				if tzId != "" {
 					tz, err = time.LoadLocation(tzId)
@@ -376,7 +348,76 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 				exlist = append(exlist, datetime)
 			}
 
+			var recurId string
+			if e.Props.Get(ical.PropRecurrenceID) != nil {
+				recurId = e.Props.Get(ical.PropRecurrenceID).Value
+			}
+			var dates string
+			if e.Props.Get(ical.PropRecurrenceDates) != nil {
+				dates = e.Props.Get(ical.PropRecurrenceDates).Value
+			}
+
+			events = append(events, caldavEvent{})
+		}
+	}
+
+}
+
+func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEnd time.Time, intvTz *time.Location) ([]Event, error) {
+	intvStart = intvStart.In(intvTz)
+	intvEnd = intvEnd.In(intvTz)
+
+	query := &caldav.CalendarQuery{
+		CompFilter: caldav.CompFilter{
+			Name: ical.CompCalendar,
+			Comps: []caldav.CompFilter{{
+				Name:  ical.CompEvent,
+				Start: intvStart.In(time.UTC),
+				End:   intvEnd.In(time.UTC),
+			}},
+		},
+		CompRequest: caldav.CalendarCompRequest{
+			Name: ical.CompCalendar,
+			Comps: []caldav.CalendarCompRequest{{
+				Name: ical.CompEvent,
+				Props: []string{
+					ical.PropUID,
+					ical.PropSummary,
+					ical.PropDateTimeStart,
+					ical.PropDateTimeEnd,
+					ical.PropCategories,
+					ical.PropRecurrenceDates,
+					ical.PropRecurrenceID,
+					ical.PropRecurrenceRule,
+				},
+			}},
+		},
+	}
+
+	tel.Log.Debug("caldav", "-----------------", "start", intvStart, "end", intvEnd)
+
+	events, err := c.client.QueryCalendar(ctx, calendar.Id, query)
+	if err != nil {
+		return nil, wrapEventsErr(err)
+	}
+
+	var out []Event
+	for _, eobj := range events {
+		for _, e := range eobj.Data.Events() {
+
 			recurrence := e.Props.Get(ical.PropRecurrenceRule)
+
+			tel.Log.Debug(
+				"caldav", "event",
+				"name", name,
+				"start", start,
+				"end", end,
+				"id", recurId,
+				"dates", dates,
+				"rule", recurrence,
+				"uid", e.Props.Get(ical.PropUID).Value,
+			)
+
 			if recurrence != nil {
 				// recurring event
 				opts, err := parseRecurrence(recurrence.Value)
@@ -390,23 +431,55 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 				if err != nil {
 					return nil, wrapEventsErr(err)
 				}
+
 			recur:
 				for _, recurTime := range rule.All() {
+					if recurTime.After(intvStart) {
+						break
+					}
 					for _, e := range exlist {
 						if e.Equal(recurTime) {
 							tel.Log.Debug("caldav", "skipped exception", "event", name)
 							continue recur
 						}
 					}
+
+					start := recurTime
+					end := recurTime.Add(duration)
+
+					if end.Before(intvStart) || start.After(intvEnd) {
+						continue
+					}
+					if start.Before(intvStart) {
+						start = intvStart
+					}
+					if end.After(intvEnd) {
+						end = intvEnd
+					}
+
+					tel.Log.Debug("caldav", "recurring event", "name", name, "start", start, "end", end)
+
 					out = append(out, Event{
 						Name:  name,
 						Tags:  tags,
-						Start: recurTime,
-						End:   recurTime.Add(duration),
+						Start: start,
+						End:   end,
 					})
 				}
 				continue
 			}
+
+			if end.Before(intvStart) || start.After(intvEnd) {
+				continue
+			}
+			if start.Before(intvStart) {
+				start = intvStart
+			}
+			if end.After(intvEnd) {
+				end = intvEnd
+			}
+
+			tel.Log.Debug("caldav", "single event", "name", name, "start", start, "end", end)
 
 			// single event
 			ev := Event{

@@ -11,7 +11,7 @@
 
 	const normFactor = $derived(1 / data[0].proportion);
 
-	let expanded = $state<string>();
+	let viewEvents = $state<string>();
 </script>
 
 {#snippet rect(
@@ -38,7 +38,7 @@
 	<div class="flex flex-col gap-2">
 		{#each data.filter((d) => d.proportion > 0) as d}
 			{@const catColor = color(d.category)}
-			{@const isExpanded = expanded === d.category}
+			{@const isViewEvents = viewEvents === d.category}
 			{@const isNotExpandable = d.events.length === 0}
 
 			<button
@@ -48,11 +48,11 @@
 				)}
 				disabled={isNotExpandable}
 				onclick={() => {
-					if (isExpanded) {
-						expanded = undefined;
+					if (isViewEvents) {
+						viewEvents = undefined;
 						return;
 					}
-					expanded = d.category;
+					viewEvents = d.category;
 				}}
 			>
 				{@render rect(
@@ -69,14 +69,14 @@
 						<ArrowDown
 							class={cn(
 								"my-auto min-w-[24px] max-w-[24px] transition-all -rotate-90",
-								isExpanded ? "rotate-0" : "",
+								isViewEvents ? "rotate-0" : "",
 							)}
 						/>
 					</div>
 				{/if}
 			</button>
 
-			{#if isExpanded}
+			{#if isViewEvents}
 				{@const normFactor =
 					d.time / Number(d.events[0].duration!.seconds)}
 				<div class="pl-3 flex flex-col gap-1">

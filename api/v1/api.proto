@@ -27,6 +27,7 @@ message CalendarResponse {
 // Events
 message EventsRequest {
   Interval interval = 1;
+  string timezone = 2;
 }
 message EventsResponse {
   repeated string event_names = 1;
