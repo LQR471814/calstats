@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"schedule-statistics/internal/tel"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/emersion/go-ical"
@@ -70,223 +68,6 @@ func (c Caldav) Calendars(ctx context.Context) ([]Calendar, error) {
 	return out, nil
 }
 
-func parseWeekday(weekday string) (rrule.Weekday, error) {
-	switch weekday {
-	case "MO":
-		return rrule.MO, nil
-	case "TU":
-		return rrule.TU, nil
-	case "WE":
-		return rrule.WE, nil
-	case "TH":
-		return rrule.TH, nil
-	case "FR":
-		return rrule.FR, nil
-	case "SA":
-		return rrule.SA, nil
-	case "SU":
-		return rrule.SU, nil
-	}
-	return rrule.MO, fmt.Errorf("invalid weekday %s", weekday)
-}
-
-func wrapRRULEErr(err error) error {
-	return fmt.Errorf("RRULE: %w", err)
-}
-
-func parseRecurrence(text string) (rrule.ROption, error) {
-	var rules rrule.ROption
-
-	for _, prop := range strings.Split(text, ";") {
-		segments := strings.Split(prop, "=")
-		if len(segments) < 2 {
-			return rules, wrapRRULEErr(fmt.Errorf("invalid property '%s'", prop))
-		}
-		key := segments[0]
-		value := segments[1]
-
-		switch key {
-		case "FREQ":
-			switch value {
-			case "YEARLY":
-				rules.Freq = rrule.YEARLY
-			case "MONTHLY":
-				rules.Freq = rrule.MONTHLY
-			case "WEEKLY":
-				rules.Freq = rrule.WEEKLY
-			case "DAILY":
-				rules.Freq = rrule.DAILY
-			case "HOURLY":
-				rules.Freq = rrule.HOURLY
-			case "MINUTELY":
-				rules.Freq = rrule.MINUTELY
-			case "SECONDLY":
-				rules.Freq = rrule.SECONDLY
-			default:
-				return rules, wrapRRULEErr(fmt.Errorf("invalid FREQ value '%s'", value))
-			}
-
-		case "INTERVAL":
-			val, err := strconv.ParseInt(value, 10, 64)
-			if err != nil {
-				return rules, wrapRRULEErr(fmt.Errorf("invalid INTERNAL value '%s': %w", value, err))
-			}
-			rules.Interval = int(val)
-
-		case "UNTIL":
-			t, err := time.Parse("20060102T150405Z", value)
-			if err != nil {
-				return rules, wrapRRULEErr(fmt.Errorf("invalid UNTIL value '%s': %w", value, err))
-			}
-			rules.Until = t
-
-		case "COUNT":
-			count, err := strconv.ParseInt(value, 10, 64)
-			if err != nil {
-				return rules, wrapRRULEErr(fmt.Errorf("invalid COUNT value '%s': %w", value, err))
-			}
-			rules.Count = int(count)
-
-		case "BYDAY":
-			segments := strings.Split(value, ",")
-
-			for _, dayDef := range segments {
-				offsetStr := ""
-				day := ""
-
-				for _, c := range dayDef {
-					if (c >= '0' && c <= '9') || c == '-' {
-						offsetStr += string(c)
-						continue
-					}
-					if c >= 'A' && c <= 'Z' {
-						day += string(c)
-						continue
-					}
-				}
-
-				var offset int64
-				if offsetStr != "" {
-					var err error
-					offset, err = strconv.ParseInt(offsetStr, 10, 64)
-					if err != nil {
-						return rules, wrapRRULEErr(fmt.Errorf("invalid BYDAY value: %w", err))
-					}
-				}
-				weekday, err := parseWeekday(day)
-				if err != nil {
-					return rules, wrapRRULEErr(fmt.Errorf("invalid BYDAY value: %w", err))
-				}
-				rules.Byweekday = append(rules.Byweekday, weekday.Nth(int(offset)))
-			}
-
-		case "BYMONTHDAY":
-			values := strings.Split(value, ",")
-			for _, v := range values {
-				parsed, err := strconv.ParseInt(v, 10, 64)
-				if err != nil {
-					return rules, wrapRRULEErr(fmt.Errorf("invalid BYMONTHDAY value '%s': %w", value, err))
-				}
-				rules.Bymonthday = append(rules.Bymonthday, int(parsed))
-			}
-
-		case "BYMONTH":
-			values := strings.Split(value, ",")
-			for _, v := range values {
-				parsed, err := strconv.ParseInt(v, 10, 64)
-				if err != nil {
-					return rules, wrapRRULEErr(fmt.Errorf(
-						"invalid BYMONTH value '%s' (whole: '%s'): %w",
-						v, value, err,
-					))
-				}
-				rules.Bymonth = append(rules.Bymonth, int(parsed))
-			}
-
-		case "BYYEARDAY":
-			values := strings.Split(value, ",")
-			for _, v := range values {
-				parsed, err := strconv.ParseInt(v, 10, 64)
-				if err != nil {
-					return rules, wrapRRULEErr(fmt.Errorf(
-						"invalid BYYEARDAY value '%s' (whole: '%s'): %w",
-						v, value, err,
-					))
-				}
-				rules.Byyearday = append(rules.Byyearday, int(parsed))
-			}
-
-		case "BYWEEKNO":
-			values := strings.Split(value, ",")
-			for _, v := range values {
-				parsed, err := strconv.ParseInt(v, 10, 64)
-				if err != nil {
-					return rules, wrapRRULEErr(fmt.Errorf(
-						"invalid BYWEEKNO value '%s' (whole: %s): %w",
-						v, value, err,
-					))
-				}
-				rules.Byweekno = append(rules.Byweekno, int(parsed))
-			}
-
-		case "BYHOUR":
-			values := strings.Split(value, ",")
-			for _, v := range values {
-				parsed, err := strconv.ParseInt(v, 10, 64)
-				if err != nil {
-					return rules, wrapRRULEErr(fmt.Errorf(
-						"invalid BYHOUR value '%s' (whole: %s): %w",
-						v, value, err,
-					))
-				}
-				rules.Byhour = append(rules.Byhour, int(parsed))
-			}
-
-		case "BYMINUTE":
-			values := strings.Split(value, ",")
-			for _, v := range values {
-				parsed, err := strconv.ParseInt(v, 10, 64)
-				if err != nil {
-					return rules, wrapRRULEErr(fmt.Errorf(
-						"invalid BYMINUTE value '%s' (whole: %s): %w",
-						v, value, err,
-					))
-				}
-				rules.Byminute = append(rules.Byminute, int(parsed))
-			}
-
-		case "BYSECOND":
-			values := strings.Split(value, ",")
-			for _, v := range values {
-				parsed, err := strconv.ParseInt(v, 10, 64)
-				if err != nil {
-					return rules, wrapRRULEErr(fmt.Errorf(
-						"invalid BYSECOND value '%s' (whole: %s): %w",
-						v, value, err,
-					))
-				}
-				rules.Bysecond = append(rules.Bysecond, int(parsed))
-			}
-
-		case "WKST":
-			var err error
-			rules.Wkst, err = parseWeekday(value)
-			if err != nil {
-				return rules, wrapRRULEErr(fmt.Errorf(
-					"invalid WKST value '%s': %w",
-					value, err,
-				))
-			}
-		}
-	}
-
-	return rules, nil
-}
-
-func wrapEventsErr(err error) error {
-	return fmt.Errorf("get events: %w", err)
-}
-
 type caldavEvent struct {
 	Uid        string
 	Name       string
@@ -294,9 +75,9 @@ type caldavEvent struct {
 	ExDates    []time.Time
 	Start, End time.Time
 	Duration   time.Duration
-	RRule      rrule.ROption
+	RRule      *rrule.RRule
 	RDates     string
-	RId        string
+	RId        time.Time
 }
 
 func (c Caldav) parseEvents(objs []caldav.CalendarObject, intvEnd time.Time, tz *time.Location) []caldavEvent {
@@ -319,10 +100,10 @@ func (c Caldav) parseEvents(objs []caldav.CalendarObject, intvEnd time.Time, tz 
 			}
 			uid := uidProp.Value
 
-			categories := e.Props.Get(ical.PropCategories)
-			var tags []string
-			if categories != nil {
-				tags, err = categories.TextList()
+			catProp := e.Props.Get(ical.PropCategories)
+			var categories []string
+			if catProp != nil {
+				categories, err = catProp.TextList()
 				if err != nil {
 					tel.Log.Warn("caldav", "parse event categories", "err", err)
 					continue
@@ -362,32 +143,53 @@ func (c Caldav) parseEvents(objs []caldav.CalendarObject, intvEnd time.Time, tz 
 				exlist = append(exlist, datetime)
 			}
 
-			var recurId string
-			if e.Props.Get(ical.PropRecurrenceID) != nil {
-				recurId = e.Props.Get(ical.PropRecurrenceID).Value
+			var recurId time.Time
+			recurIdProp := e.Props.Get(ical.PropRecurrenceID)
+			if recurIdProp != nil && recurIdProp.Value != "" {
+				recurId, err = recurIdProp.DateTime(tz)
+				if err != nil {
+					tel.Log.Warn("caldav", "parse recurrence id", "err", err)
+					continue
+				}
 			}
 			var rdates string
-			if e.Props.Get(ical.PropRecurrenceDates) != nil {
-				rdates = e.Props.Get(ical.PropRecurrenceDates).Value
+			rdateProp := e.Props.Get(ical.PropRecurrenceDates)
+			if rdateProp != nil {
+				rdates = rdateProp.Value
 			}
 
-			var ropts rrule.ROption
-			recurrence := e.Props.Get(ical.PropRecurrenceRule)
-			if recurrence != nil {
-				ropts, err = parseRecurrence(recurrence.Value)
+			var rule *rrule.RRule
+			rruleProp := e.Props.Get(ical.PropRecurrenceRule)
+			if rruleProp != nil {
+				ropts, err := rrule.StrToROptionInLocation(rruleProp.Value, tz)
 				if err != nil {
 					tel.Log.Warn("caldav", "parse recurrence rule", "err", err)
 					continue
 				}
+				if ropts == nil {
+					tel.Log.Warn("caldav", "parse recurrence rule", "err", fmt.Errorf("ropts is nil"))
+					continue
+				}
+
 				if ropts.Until == (time.Time{}) || ropts.Until.After(intvEnd) {
 					ropts.Until = intvEnd
+				}
+				// set default dtstart to original event's starting time
+				if ropts.Dtstart == (time.Time{}) {
+					ropts.Dtstart = start
+				}
+
+				rule, err = rrule.NewRRule(*ropts)
+				if err != nil {
+					tel.Log.Warn("caldav", "new rrule", "err", err)
+					continue
 				}
 			}
 
 			events = append(events, caldavEvent{
 				Uid:        uid,
 				Name:       name,
-				Categories: tags,
+				Categories: categories,
 
 				Start:    start,
 				End:      end,
@@ -395,13 +197,28 @@ func (c Caldav) parseEvents(objs []caldav.CalendarObject, intvEnd time.Time, tz 
 
 				ExDates: exlist,
 				RId:     recurId,
-				RRule:   ropts,
+				RRule:   rule,
 				RDates:  rdates,
 			})
 		}
 	}
 
 	return events
+}
+
+// adjustEventBounds crops the event so that it is within the interval bounds [intvStart, intvEnd].
+// If the event is outside the interval completely, it will return false in the second return value.
+func (c Caldav) adjustEventBounds(ev Event, intvStart, intvEnd time.Time) (Event, bool) {
+	if ev.End.Before(intvStart) || ev.Start.After(intvEnd) {
+		return ev, false
+	}
+	if ev.Start.Before(intvStart) {
+		ev.Start = intvStart
+	}
+	if ev.End.After(intvEnd) {
+		ev.End = intvEnd
+	}
+	return ev, true
 }
 
 func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEnd time.Time, tz *time.Location) ([]Event, error) {
@@ -432,7 +249,7 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 		},
 	})
 	if err != nil {
-		return nil, wrapEventsErr(err)
+		return nil, err
 	}
 
 	events := c.parseEvents(res, intvEnd, tz)
@@ -441,80 +258,74 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 	intvEnd = intvEnd.In(tz)
 
 	var out []Event
-	for _, eobj := range events {
-		for _, e := range eobj.Data.Events() {
 
-			recurrence := e.Props.Get(ical.PropRecurrenceRule)
+	type recurringEvent struct {
+		original  caldavEvent
+		overrides []caldavEvent
+	}
+	recurring := map[string]recurringEvent{}
+	for _, e := range events {
+		track := recurring[e.Uid]
+		if e.RRule != nil { // original recurring event
+			track.original = e
+		} else if e.RId != (time.Time{}) { // override instance of recurring event
+			track.overrides = append(track.overrides, e)
+		} else { // single event
+			outev, ok := c.adjustEventBounds(Event{
+				Name:  e.Name,
+				Tags:  e.Categories,
+				Start: e.Start,
+				End:   e.End,
+			}, intvStart, intvEnd)
+			if ok {
+				out = append(out, outev)
+			}
+			continue
+		}
+		recurring[e.Uid] = track
+	}
 
-			tel.Log.Debug(
-				"caldav", "event",
-				"name", name,
-				"start", start,
-				"end", end,
-				"id", recurId,
-				"dates", dates,
-				"rule", recurrence,
-				"uid", e.Props.Get(ical.PropUID).Value,
-			)
+	for _, re := range recurring {
+		if re.original.Name == "" {
+			tel.Log.Warn("caldav", "recurring event without original event present", "re", re)
+			continue
+		}
 
-			if recurrence != nil {
-			recur:
-				for _, recurTime := range rule.All() {
-					if recurTime.After(intvStart) {
-						break
-					}
-					for _, e := range exlist {
-						if e.Equal(recurTime) {
-							tel.Log.Debug("caldav", "skipped exception", "event", name)
-							continue recur
-						}
-					}
-
-					start := recurTime
-					end := recurTime.Add(duration)
-
-					if end.Before(intvStart) || start.After(intvEnd) {
-						continue
-					}
-					if start.Before(intvStart) {
-						start = intvStart
-					}
-					if end.After(intvEnd) {
-						end = intvEnd
-					}
-
-					tel.Log.Debug("caldav", "recurring event", "name", name, "start", start, "end", end)
-
-					out = append(out, Event{
-						Name:  name,
-						Tags:  tags,
-						Start: start,
-						End:   end,
-					})
+	recur:
+		for _, recurTime := range re.original.RRule.All() {
+			if recurTime.After(intvEnd) {
+				break
+			}
+			for _, e := range re.original.ExDates {
+				if e.Equal(recurTime) {
+					continue recur
 				}
-				continue
 			}
 
-			if end.Before(intvStart) || start.After(intvEnd) {
-				continue
-			}
-			if start.Before(intvStart) {
-				start = intvStart
-			}
-			if end.After(intvEnd) {
-				end = intvEnd
+			for _, ov := range re.overrides {
+				if recurTime.Equal(ov.RId) {
+					outev, ok := c.adjustEventBounds(Event{
+						Name:  ov.Name,
+						Tags:  ov.Categories,
+						Start: ov.Start,
+						End:   ov.End,
+					}, intvStart, intvEnd)
+					if ok {
+						out = append(out, outev)
+					}
+					continue recur
+				}
 			}
 
-			tel.Log.Debug("caldav", "single event", "name", name, "start", start, "end", end)
-
-			// single event
-			ev := Event{
-				Name:  name,
-				Tags:  tags,
-				Start: start,
-				End:   end,
+			outev, ok := c.adjustEventBounds(Event{
+				Name:  re.original.Name,
+				Tags:  re.original.Categories,
+				Start: recurTime,
+				End:   recurTime.Add(re.original.Duration),
+			}, intvStart, intvEnd)
+			if ok {
+				out = append(out, outev)
 			}
-			out = append(out, ev)
 		}
 	}
 
