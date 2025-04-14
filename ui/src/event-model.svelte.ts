@@ -28,7 +28,6 @@ const full_day = {
 }
 
 export class EventModel {
-	version = $state(0)
 	option = $state(IntervalOption.THIS_WEEK)
 	customBounds: Interval = $state<Interval>() as Interval
 	events = $state.raw<EventsResponse>()
@@ -119,15 +118,61 @@ export class EventModel {
 				const end = now;
 				return { start, end };
 			}
+			default:
+				throw new Error(`unknown option: ${this.option}`)
 		}
 	})
 
-	constructor() {
-		const now = Temporal.Now.zonedDateTimeISO();
-		this.customBounds = {
-			start: now.subtract({ weeks: 1 }),
-			end: now.add({ weeks: 1 }),
+	private loadOption() {
+		this.option = (IntervalOption as any)[localStorage.getItem("interval.option") ?? ""]
+		if (!this.option) {
+			this.option = IntervalOption.THIS_WEEK
 		}
+		$effect(() => {
+			localStorage.setItem("interval.option", this.option)
+		})
+	}
+
+	private loadCustomBounds() {
+		const startText = localStorage.getItem("interval.custom.start")
+		const endText = localStorage.getItem("interval.custom.end")
+
+		const now = Temporal.Now.zonedDateTimeISO();
+
+		let customStart: Temporal.ZonedDateTime | undefined
+		if (startText) {
+			try {
+				customStart = Temporal.ZonedDateTime.from(startText)
+			} catch { }
+		}
+		if (!customStart) {
+			customStart = now.subtract({ weeks: 1 })
+		}
+
+		let customEnd: Temporal.ZonedDateTime | undefined
+		if (endText) {
+			try {
+				customEnd = Temporal.ZonedDateTime.from(endText)
+			} catch { }
+		}
+		if (!customEnd) {
+			customEnd = now.add({ weeks: 1 })
+		}
+
+		this.customBounds = {
+			start: customStart,
+			end: customEnd,
+		}
+
+		$effect(() => {
+			localStorage.setItem("interval.custom.start", this.customBounds.start.toString())
+			localStorage.setItem("interval.custom.end", this.customBounds.end.toString())
+		})
+	}
+
+	constructor() {
+		this.loadOption()
+		this.loadCustomBounds()
 
 		$effect(() => {
 			this.interval

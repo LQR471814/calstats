@@ -5,7 +5,7 @@
 	import { createQuery } from "@tanstack/svelte-query";
 	import Pie from "./visualizers/Pie.svelte";
 	import { getCategoryStats } from "./analysis";
-	import { EventModel } from "./event-state.svelte";
+	import { EventModel } from "./event-model.svelte";
 	import List from "./visualizers/List.svelte";
 	import AnalysisInterval from "./AnalysisInterval.svelte";
 

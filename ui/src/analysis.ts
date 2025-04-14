@@ -1,5 +1,5 @@
 import type { EventsResponse, Event } from "$api/api_pb";
-import type { Interval } from "./event-state.svelte";
+import type { Interval } from "./event-model.svelte";
 
 export function formatDuration(seconds: number): string {
 	const out: string[] = [];

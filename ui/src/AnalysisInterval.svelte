@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { EventModel, IntervalOption } from "./event-state.svelte";
+	import { EventModel, IntervalOption } from "./event-model.svelte";
 	import { cn } from "$lib/utils";
 	import * as Select from "$lib/components/ui/select";
 	import Button from "$lib/components/ui/button/button.svelte";
