@@ -147,6 +147,7 @@ export class EventModel {
 				})
 					.then((res) => {
 						this.events = res
+
 						console.table(
 							res.events.map((e) => {
 								const startTime = Temporal.Instant
@@ -165,6 +166,7 @@ export class EventModel {
 								}
 							})
 						)
+
 						resolve()
 					})
 					.catch((err) => {
