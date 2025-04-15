@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"embed"
 	"flag"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"os"
 	"os/signal"
@@ -107,9 +109,12 @@ func withCORS(connectHandler http.Handler) http.Handler {
 	return c.Handler(connectHandler)
 }
 
+//go:embed ui/dist/*
+var ui embed.FS
+
 func main() {
 	cfgPath := flag.String("config", "config.json5", "Configuration path.")
-	port := flag.Int("port", 8003, "The port to host on.")
+	port := flag.Int("port", 3000, "The port to host on.")
 	debug := flag.Bool("debug", false, "Print the contents of the configured calendar and exit.")
 	flag.Parse()
 
@@ -141,9 +146,16 @@ func main() {
 		return
 	}
 
-	tel.Log.Info("main", "listening to gRPC...", "port", *port)
+	tel.Log.Info("main", "listening on...", "port", *port)
 
 	mux := http.NewServeMux()
+
+	buildFs, err := fs.Sub(ui, "ui/dist")
+	if err != nil {
+		fatalerr("access ui assets", "err", err)
+	}
+	mux.Handle("/", http.FileServerFS(buildFs))
+
 	handle, handler := v1connect.NewCalendarServiceHandler(
 		CalendarService{
 			calendars:      cfg.Calendars,
@@ -155,6 +167,7 @@ func main() {
 		),
 	)
 	mux.Handle(handle, withCORS(handler))
+
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", *port),
 		Handler: h2c.NewHandler(mux, &http2.Server{}),

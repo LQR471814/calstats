@@ -7,7 +7,7 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"ignore": ["**/tsconfig.*"]
+		"ignore": ["**/tsconfig.*", "**/*.svelte", "**/api/v1/**"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -21,7 +21,12 @@
 		"rules": {
 			"recommended": true,
 			"style": {
-				"noNonNullAssertion": "off"
+				"noNonNullAssertion": "off",
+				"noParameterAssign": "off",
+				"useConst": "off"
+			},
+			"suspicious": {
+				"noExplicitAny": "off"
 			}
 		}
 	},

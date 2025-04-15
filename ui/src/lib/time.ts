@@ -1,6 +1,6 @@
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
-import type { Temporal } from "@js-temporal/polyfill";
 import { ZonedDateTime as I18nZonedDateTime } from "@internationalized/date";
+import type { Temporal } from "@js-temporal/polyfill";
 
 export function instantToTimestamp(instant: Temporal.Instant): Timestamp {
 	return {
@@ -10,7 +10,9 @@ export function instantToTimestamp(instant: Temporal.Instant): Timestamp {
 	};
 }
 
-export function zonedToI18n(datetime: Temporal.ZonedDateTime): I18nZonedDateTime {
+export function zonedToI18n(
+	datetime: Temporal.ZonedDateTime,
+): I18nZonedDateTime {
 	return new I18nZonedDateTime(
 		datetime.year,
 		datetime.month,
@@ -21,5 +23,5 @@ export function zonedToI18n(datetime: Temporal.ZonedDateTime): I18nZonedDateTime
 		datetime.minute,
 		datetime.second,
 		datetime.millisecond,
-	)
+	);
 }

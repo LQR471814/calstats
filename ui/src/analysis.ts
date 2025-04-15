@@ -1,4 +1,4 @@
-import type { EventsResponse, Event } from "$api/api_pb";
+import type { Event, EventsResponse } from "$api/api_pb";
 import type { Interval } from "./event-model.svelte";
 
 export function formatDuration(seconds: number): string {
@@ -47,24 +47,24 @@ export function formatDuration(seconds: number): string {
 }
 
 export class CategoryStat {
-	category: string
-	time: number
-	proportion: number
-	events: Event[]
+	category: string;
+	time: number;
+	proportion: number;
+	events: Event[];
 
 	constructor(category: string, time: number, proportion: number) {
-		this.category = category
-		this.time = time
-		this.proportion = proportion
-		this.events = []
+		this.category = category;
+		this.time = time;
+		this.proportion = proportion;
+		this.events = [];
 	}
 
 	add(e: Event) {
-		this.events.push(e)
+		this.events.push(e);
 		if (!e.duration) {
-			throw new Error("undefined duration")
+			throw new Error("undefined duration");
 		}
-		this.time += Number(e.duration.seconds)
+		this.time += Number(e.duration.seconds);
 	}
 }
 
@@ -74,57 +74,60 @@ export function getCategoryStats(
 	disabled: string[],
 ): CategoryStat[] | undefined {
 	if (!events) {
-		return
+		return;
 	}
 
-	const tags = [...events.tags, "Unknown"]
-	const unknownTagIdx = tags.length - 1
-	const disabledTable = new Array<boolean>(tags.length)
+	const tags = [...events.tags, "Unknown"];
+	const unknownTagIdx = tags.length - 1;
+	const disabledTable = new Array<boolean>(tags.length);
 	for (const d of disabled) {
-		disabledTable[tags.indexOf(d)] = true
+		disabledTable[tags.indexOf(d)] = true;
 	}
 
-	const categories: CategoryStat[] = new Array(tags.length)
+	const categories: CategoryStat[] = new Array(tags.length);
 	for (let i = 0; i < tags.length; i++) {
-		categories[i] = new CategoryStat(tags[i], 0, 0)
+		categories[i] = new CategoryStat(tags[i], 0, 0);
 	}
 
 	// count time spent in each category
-	let trackedSeconds = 0
-	let disabledSeconds = 0
+	let trackedSeconds = 0;
+	let disabledSeconds = 0;
 	for (const e of events.events) {
 		if (!e.duration) {
-			throw new Error("undefined duration")
+			throw new Error("undefined duration");
 		}
-		const tagIdx = e.tags.length > 0 ? e.tags[0] : unknownTagIdx
-		trackedSeconds += Number(e.duration.seconds) // add counted seconds regardless of disabled tags
+		const tagIdx = e.tags.length > 0 ? e.tags[0] : unknownTagIdx;
+		trackedSeconds += Number(e.duration.seconds); // add counted seconds regardless of disabled tags
 		if (!disabledTable[tagIdx]) {
-			categories[tagIdx].add(e)
+			categories[tagIdx].add(e);
 		} else {
-			disabledSeconds += Number(e.duration.seconds)
+			disabledSeconds += Number(e.duration.seconds);
 		}
 	}
 
 	// count untracked or time without an event on it
-	const totalDuration = interval.end.since(interval.start)
+	const totalDuration = interval.end.since(interval.start);
 
 	const untrackedSeconds = totalDuration
 		.subtract({ seconds: trackedSeconds })
-		.total({ unit: "seconds" })
+		.total({ unit: "seconds" });
 	if (!disabledTable[unknownTagIdx]) {
-		categories[unknownTagIdx].time += untrackedSeconds
+		categories[unknownTagIdx].time += untrackedSeconds;
 	} else {
-		disabledSeconds += untrackedSeconds
+		disabledSeconds += untrackedSeconds;
 	}
 
-	const totalSeconds = totalDuration.total({ unit: "seconds" }) - disabledSeconds
+	const totalSeconds =
+		totalDuration.total({ unit: "seconds" }) - disabledSeconds;
 	for (const cat of categories) {
-		cat.proportion = cat.time / totalSeconds
-		cat.events.sort((a, b) => Number(b.duration!.seconds) - Number(a.duration!.seconds))
+		cat.proportion = cat.time / totalSeconds;
+		cat.events.sort(
+			(a, b) => Number(b.duration!.seconds) - Number(a.duration!.seconds),
+		);
 	}
 
 	// sort categories
-	categories.sort((a, b) => b.time - a.time)
+	categories.sort((a, b) => b.time - a.time);
 
-	return categories
+	return categories;
 }

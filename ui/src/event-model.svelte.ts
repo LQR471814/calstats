@@ -1,8 +1,8 @@
+import type { EventsResponse } from "$api/api_pb";
 import { instantToTimestamp } from "$lib/time";
 import { Temporal } from "@js-temporal/polyfill";
+import { toast } from "svelte-sonner";
 import { client } from "./rpc";
-import { toast } from "svelte-sonner"
-import type { EventsResponse } from "$api/api_pb";
 
 export type Interval = {
 	start: Temporal.ZonedDateTime;
@@ -25,12 +25,12 @@ const full_day = {
 	seconds: 59,
 	milliseconds: 999,
 	nanoseconds: 999,
-}
+};
 
 export class EventModel {
-	option = $state(IntervalOption.THIS_WEEK)
-	customBounds: Interval = $state<Interval>() as Interval
-	events = $state.raw<EventsResponse>()
+	option = $state(IntervalOption.THIS_WEEK);
+	customBounds: Interval = $state<Interval>() as Interval;
+	events = $state.raw<EventsResponse>();
 
 	interval: Interval = $derived.by((): Interval => {
 		const now = Temporal.Now.zonedDateTimeISO();
@@ -119,114 +119,123 @@ export class EventModel {
 				return { start, end };
 			}
 			default:
-				throw new Error(`unknown option: ${this.option}`)
+				throw new Error(`unknown option: ${this.option}`);
 		}
-	})
+	});
 
 	private loadOption() {
-		this.option = (IntervalOption as any)[localStorage.getItem("interval.option") ?? ""]
+		this.option = (IntervalOption as any)[
+			localStorage.getItem("interval.option") ?? ""
+		];
 		if (!this.option) {
-			this.option = IntervalOption.THIS_WEEK
+			this.option = IntervalOption.THIS_WEEK;
 		}
 		$effect(() => {
-			localStorage.setItem("interval.option", this.option)
-		})
+			localStorage.setItem("interval.option", this.option);
+		});
 	}
 
 	private loadCustomBounds() {
-		const startText = localStorage.getItem("interval.custom.start")
-		const endText = localStorage.getItem("interval.custom.end")
+		const startText = localStorage.getItem("interval.custom.start");
+		const endText = localStorage.getItem("interval.custom.end");
 
 		const now = Temporal.Now.zonedDateTimeISO();
 
-		let customStart: Temporal.ZonedDateTime | undefined
+		let customStart: Temporal.ZonedDateTime | undefined;
 		if (startText) {
 			try {
-				customStart = Temporal.ZonedDateTime.from(startText)
-			} catch { }
+				customStart = Temporal.ZonedDateTime.from(startText);
+			} catch {}
 		}
 		if (!customStart) {
-			customStart = now.subtract({ weeks: 1 })
+			customStart = now.subtract({ weeks: 1 });
 		}
 
-		let customEnd: Temporal.ZonedDateTime | undefined
+		let customEnd: Temporal.ZonedDateTime | undefined;
 		if (endText) {
 			try {
-				customEnd = Temporal.ZonedDateTime.from(endText)
-			} catch { }
+				customEnd = Temporal.ZonedDateTime.from(endText);
+			} catch {}
 		}
 		if (!customEnd) {
-			customEnd = now.add({ weeks: 1 })
+			customEnd = now.add({ weeks: 1 });
 		}
 
 		this.customBounds = {
 			start: customStart,
 			end: customEnd,
-		}
+		};
 
 		$effect(() => {
-			localStorage.setItem("interval.custom.start", this.customBounds.start.toString())
-			localStorage.setItem("interval.custom.end", this.customBounds.end.toString())
-		})
+			localStorage.setItem(
+				"interval.custom.start",
+				this.customBounds.start.toString(),
+			);
+			localStorage.setItem(
+				"interval.custom.end",
+				this.customBounds.end.toString(),
+			);
+		});
 	}
 
 	constructor() {
-		this.loadOption()
-		this.loadCustomBounds()
+		this.loadOption();
+		this.loadCustomBounds();
 
 		$effect(() => {
-			this.interval
-			this.refresh()
-		})
+			this.interval;
+			this.refresh();
+		});
 	}
 
 	refresh(): Promise<void> {
 		return new Promise((resolve, reject) => {
 			toast.promise(
-				() => client.events({
-					timezone: Temporal.Now.timeZoneId(),
-					interval: {
-						start: instantToTimestamp(this.interval.start.toInstant()),
-						end: instantToTimestamp(this.interval.end.toInstant()),
-					},
-				})
-					.then((res) => {
-						this.events = res
+				() =>
+					client
+						.events({
+							timezone: Temporal.Now.timeZoneId(),
+							interval: {
+								start: instantToTimestamp(this.interval.start.toInstant()),
+								end: instantToTimestamp(this.interval.end.toInstant()),
+							},
+						})
+						.then((res) => {
+							this.events = res;
 
-						console.table(
-							res.events.map((e) => {
-								const startTime = Temporal.Instant
-									.fromEpochMilliseconds(Number(e.interval!.start!.seconds) * 1000)
-									.toZonedDateTimeISO(Temporal.Now.timeZoneId())
+							console.table(
+								res.events.map((e) => {
+									const startTime = Temporal.Instant.fromEpochMilliseconds(
+										Number(e.interval!.start!.seconds) * 1000,
+									).toZonedDateTimeISO(Temporal.Now.timeZoneId());
 
-								const endTime = Temporal.Instant
-									.fromEpochMilliseconds(Number(e.interval!.end!.seconds) * 1000)
-									.toZonedDateTimeISO(Temporal.Now.timeZoneId())
+									const endTime = Temporal.Instant.fromEpochMilliseconds(
+										Number(e.interval!.end!.seconds) * 1000,
+									).toZonedDateTimeISO(Temporal.Now.timeZoneId());
 
-								return {
-									name: res.eventNames[e.name],
-									tag: e.tags.map((t) => res.tags[t])[0],
-									startTime: `${startTime.year}-${startTime.month}-${startTime.day} ${startTime.hour}h`,
-									endTime: `${endTime.year}-${endTime.month}-${endTime.day} ${endTime.hour}h`
-								}
-							})
-						)
+									return {
+										name: res.eventNames[e.name],
+										tag: e.tags.map((t) => res.tags[t])[0],
+										startTime: `${startTime.year}-${startTime.month}-${startTime.day} ${startTime.hour}h`,
+										endTime: `${endTime.year}-${endTime.month}-${endTime.day} ${endTime.hour}h`,
+									};
+								}),
+							);
 
-						resolve()
-					})
-					.catch((err) => {
-						reject(err)
-						throw err
-					}),
+							resolve();
+						})
+						.catch((err) => {
+							reject(err);
+							throw err;
+						}),
 				{
-					loading: 'Fetching events...',
-					success: 'Fetch events: Success',
-					error: 'Fetch events: Error',
+					loading: "Fetching events...",
+					success: "Fetch events: Success",
+					error: "Fetch events: Error",
 					dismissable: true,
 					duration: 500,
-				}
-			)
-		})
+				},
+			);
+		});
 	}
 }
-
