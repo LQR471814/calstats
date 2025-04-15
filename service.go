@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	v1 "schedule-statistics/api/v1"
-	"schedule-statistics/internal/calendar"
+	v1 "schedule-manager/api/v1"
+	"schedule-manager/internal/calendar"
 	"slices"
 	"time"
 

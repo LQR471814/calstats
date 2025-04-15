@@ -1,4 +1,4 @@
-# schedule-statistics
+# schedule-manager
 
 > Visualize the usage of your time given a schedule.
 
@@ -22,7 +22,7 @@
 ## Usage
 
 ```sh
-./schedule-statistics -config <path/to/config.json5>
+./schedule-manager -config <path/to/config.json5>
 ```
 
 ## Build

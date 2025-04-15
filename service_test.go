@@ -1,7 +1,7 @@
 package main
 
 import (
-	"schedule-statistics/internal/calendar"
+	"schedule-manager/internal/calendar"
 	"testing"
 	"time"
 )

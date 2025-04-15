@@ -1,4 +1,4 @@
-module schedule-statistics
+module schedule-manager
 
 go 1.23.4
 

@@ -9,9 +9,9 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"schedule-statistics/api/v1/v1connect"
-	"schedule-statistics/internal/calendar"
-	"schedule-statistics/internal/tel"
+	"schedule-manager/api/v1/v1connect"
+	"schedule-manager/internal/calendar"
+	"schedule-manager/internal/tel"
 	"slices"
 	"time"
 

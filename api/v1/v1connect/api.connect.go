@@ -9,7 +9,7 @@ import (
 	context "context"
 	errors "errors"
 	http "net/http"
-	v1 "schedule-statistics/api/v1"
+	v1 "schedule-manager/api/v1"
 	strings "strings"
 )
 
