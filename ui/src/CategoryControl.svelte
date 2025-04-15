@@ -12,11 +12,11 @@
 <div class="flex flex-col gap-6">
 	<h4>Categories</h4>
 
-	<div class="flex flex-col gap-2 w-fit">
+	<div class="flex flex-col gap-3 w-fit">
 		{#each categories as cat, i}
 			{@const c = color(cat)}
 			{@const checked = !disabled.includes(cat)}
-			<div class="w-fit">
+			<div class="flex gap-2 w-fit">
 				<Checkbox
 					id={`pie-checkbox-${i}`}
 					style={`border-color: ${c}; background-color: ${checked ? c : "transparent"}`}
