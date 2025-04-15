@@ -29,5 +29,6 @@
 
 ```sh
 cd ui && pnpm build
+go build
 ```
 
