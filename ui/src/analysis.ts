@@ -109,9 +109,7 @@ export function getCategoryStats(
 	const totalDuration = interval.end.since(interval.start)
 
 	const untrackedSeconds = totalDuration
-		.subtract({
-			seconds: trackedSeconds,
-		})
+		.subtract({ seconds: trackedSeconds })
 		.total({ unit: "seconds" })
 	if (!disabledTable[unknownTagIdx]) {
 		categories[unknownTagIdx].time += untrackedSeconds
