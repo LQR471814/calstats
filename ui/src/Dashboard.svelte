@@ -8,6 +8,7 @@
 	import { EventModel } from "./event-model.svelte";
 	import List from "./visualizers/List.svelte";
 	import AnalysisInterval from "./AnalysisInterval.svelte";
+	import CategoryControl from "./CategoryControl.svelte";
 
 	const metaQuery = createQuery({
 		queryKey: ["meta"],
@@ -26,11 +27,13 @@
 
 	const model = new EventModel();
 
-	const catStats = $derived(
-		model.events
-			? getCategoryStats(model.interval, model.events)
-			: undefined,
-	);
+	let disabledCategories = $state<string[]>([]);
+
+	const catStats = $derived.by(() => {
+		return model.events
+			? getCategoryStats(model.interval, model.events, disabledCategories)
+			: undefined;
+	});
 </script>
 
 <main class="flex gap-6 px-6">
@@ -67,5 +70,11 @@
 
 	<div>
 		<AnalysisInterval {model} className="sticky top-0 py-6" />
+		{#if model.events}
+			<CategoryControl
+				categories={[...model.events.tags, "Unknown"]}
+				bind:disabled={disabledCategories}
+			/>
+		{/if}
 	</div>
 </main>

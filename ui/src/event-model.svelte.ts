@@ -206,8 +206,8 @@ export class EventModel {
 								return {
 									name: res.eventNames[e.name],
 									tag: e.tags.map((t) => res.tags[t])[0],
-									startTime: `${startTime.year}-${startTime.month}-${startTime.day} ${startTime.hour}`,
-									endTime: `${endTime.year}-${endTime.month}-${endTime.day} ${endTime.hour}`
+									startTime: `${startTime.year}-${startTime.month}-${startTime.day} ${startTime.hour}h`,
+									endTime: `${endTime.year}-${endTime.month}-${endTime.day} ${endTime.hour}h`
 								}
 							})
 						)

@@ -68,16 +68,26 @@ export class CategoryStat {
 	}
 }
 
-export function getCategoryStats(interval: Interval, events: EventsResponse): CategoryStat[] | undefined {
+export function getCategoryStats(
+	interval: Interval,
+	events: EventsResponse,
+	disabled: string[],
+): CategoryStat[] | undefined {
 	if (!events) {
 		return
 	}
 
-	let categories: CategoryStat[] = new Array(events.tags.length + 1)
-	for (let i = 0; i < events.tags.length; i++) {
-		categories[i] = new CategoryStat(events.tags[i], 0, 0)
+	const tags = [...events.tags, "Unknown"]
+	const unknownTagIdx = tags.length - 1
+	const disabledTable = new Array<boolean>(tags.length)
+	for (const d of disabled) {
+		disabledTable[tags.indexOf(d)] = true
 	}
-	categories[events.tags.length] = new CategoryStat("Unknown", 0, 0)
+
+	const categories: CategoryStat[] = new Array(tags.length)
+	for (let i = 0; i < tags.length; i++) {
+		categories[i] = new CategoryStat(tags[i], 0, 0)
+	}
 
 	// count time spent in each category
 	let countedSeconds = 0
@@ -85,17 +95,21 @@ export function getCategoryStats(interval: Interval, events: EventsResponse): Ca
 		if (!e.duration) {
 			throw new Error("undefined duration")
 		}
-		const tagIdx = e.tags.length > 0 ? e.tags[0] : events.tags.length
-		categories[tagIdx].add(e)
-		countedSeconds += Number(e.duration.seconds)
+		const tagIdx = e.tags.length > 0 ? e.tags[0] : unknownTagIdx
+		countedSeconds += Number(e.duration.seconds) // add counted seconds regardless of disabled tags
+		if (!disabledTable[tagIdx]) {
+			categories[tagIdx].add(e)
+		}
 	}
 
 	// count untracked or time without an event on it
 	const totalDuration = interval.end.since(interval.start)
-	const untrackedTime = totalDuration.subtract({
-		seconds: countedSeconds,
-	})
-	categories[events.tags.length].time += untrackedTime.total({ unit: "seconds" })
+	if (!disabledTable[unknownTagIdx]) {
+		const untrackedTime = totalDuration.subtract({
+			seconds: countedSeconds,
+		})
+		categories[unknownTagIdx].time += untrackedTime.total({ unit: "seconds" })
+	}
 
 	const totalSeconds = totalDuration.total({ unit: "seconds" })
 	for (const cat of categories) {

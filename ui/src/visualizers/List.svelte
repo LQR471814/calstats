@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { type CategoryStat, formatDuration } from "../analysis";
-	import * as d3 from "d3";
 	import ArrowDown from "@lucide/svelte/icons/chevron-down";
 	import type { EventsResponse } from "$api/api_pb";
 	import { cn } from "$lib/utils";
-
-	const color = d3.scaleOrdinal(d3.schemeObservable10);
+	import { color } from "$lib/color"
 
 	let { data, ev }: { data: CategoryStat[]; ev: EventsResponse } = $props();
 
@@ -36,7 +34,7 @@
 <div class="flex flex-col gap-6 w-[300px]">
 	<h3>List</h3>
 	<div class="flex flex-col gap-2">
-		{#each data.filter((d) => d.proportion > 0) as d}
+		{#each data.filter((d) => Math.round(d.proportion * 1000) / 100 > 0) as d}
 			{@const catColor = color(d.category)}
 			{@const isViewEvents = viewEvents === d.category}
 			{@const isNotExpandable = d.events.length === 0}

@@ -1,24 +1,16 @@
 <script lang="ts">
 	import { formatDuration, type CategoryStat } from "../analysis";
-	import { Checkbox } from "$lib/components/ui/checkbox";
-	import { Label } from "$lib/components/ui/label";
 	import * as d3 from "d3";
 	import { cn } from "$lib/utils";
+	import { color } from "$lib/color"
 
 	let { data }: { data: CategoryStat[] } = $props();
 
-	let disabled = $state<string[]>([]);
-
-	const color = d3.scaleOrdinal(d3.schemeObservable10);
 	const arcs = $derived.by(() => {
 		const pie = d3.pie();
 
 		const arcData = new Array<number>(data.length);
 		for (let i = 0; i < data.length; i++) {
-			if (disabled.includes(data[i].category)) {
-				arcData[i] = 0;
-				continue;
-			}
 			arcData[i] = data[i].time;
 		}
 		return pie(arcData);
@@ -112,33 +104,4 @@
 		</text>
 	</svg>
 
-	<div class="flex flex-col gap-2 flex-wrap max-h-[200px] w-fit">
-		{#each data as d, i}
-			{@const c = color(d.category)}
-			{@const checked = !disabled.includes(d.category)}
-			<div class="w-fit">
-				<Checkbox
-					id={`pie-checkbox-${i}`}
-					style={`border-color: ${c}; background-color: ${checked ? c : "transparent"}`}
-					bind:checked={() => checked,
-					() => {
-						const idx = disabled.indexOf(d.category);
-						if (idx >= 0) {
-							disabled.splice(idx, 1);
-							return;
-						}
-						disabled.push(d.category);
-					}}
-					aria-labelledby={`pie-label-${i}`}
-				/>
-				<Label
-					id={`pie-label-${i}`}
-					for={`pie-checkbox-${i}`}
-					class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-				>
-					{d.category}
-				</Label>
-			</div>
-		{/each}
-	</div>
 </div>

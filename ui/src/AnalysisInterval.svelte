@@ -113,7 +113,7 @@
 		</Select.Content>
 	</Select.Root>
 
-	<div class="flex justify-end">
+	<div class="flex">
 		<Button
 			class="w-fit"
 			variant={pressed ? "ghost" : "default"}
