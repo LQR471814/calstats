@@ -90,28 +90,36 @@ export function getCategoryStats(
 	}
 
 	// count time spent in each category
-	let countedSeconds = 0
+	let trackedSeconds = 0
+	let disabledSeconds = 0
 	for (const e of events.events) {
 		if (!e.duration) {
 			throw new Error("undefined duration")
 		}
 		const tagIdx = e.tags.length > 0 ? e.tags[0] : unknownTagIdx
-		countedSeconds += Number(e.duration.seconds) // add counted seconds regardless of disabled tags
+		trackedSeconds += Number(e.duration.seconds) // add counted seconds regardless of disabled tags
 		if (!disabledTable[tagIdx]) {
 			categories[tagIdx].add(e)
+		} else {
+			disabledSeconds += Number(e.duration.seconds)
 		}
 	}
 
 	// count untracked or time without an event on it
 	const totalDuration = interval.end.since(interval.start)
-	if (!disabledTable[unknownTagIdx]) {
-		const untrackedTime = totalDuration.subtract({
-			seconds: countedSeconds,
+
+	const untrackedSeconds = totalDuration
+		.subtract({
+			seconds: trackedSeconds,
 		})
-		categories[unknownTagIdx].time += untrackedTime.total({ unit: "seconds" })
+		.total({ unit: "seconds" })
+	if (!disabledTable[unknownTagIdx]) {
+		categories[unknownTagIdx].time += untrackedSeconds
+	} else {
+		disabledSeconds += untrackedSeconds
 	}
 
-	const totalSeconds = totalDuration.total({ unit: "seconds" })
+	const totalSeconds = totalDuration.total({ unit: "seconds" }) - disabledSeconds
 	for (const cat of categories) {
 		cat.proportion = cat.time / totalSeconds
 		cat.events.sort((a, b) => Number(b.duration!.seconds) - Number(a.duration!.seconds))
