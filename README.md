@@ -25,7 +25,7 @@
 ## Usage
 
 ```sh
-./schedule-statistics -config <path/to/config.json5> serve
+./schedule-statistics --config <path/to/config.json5> serve
 ```
 
 ## Build
