@@ -1,4 +1,4 @@
-# schedule-manager
+# schedule-statistics
 
 > Visualize the usage of your time given a schedule.
 
@@ -8,21 +8,24 @@
 
 ```json5
 // config.json5
-{
-	server: {
-		url: "https://<caldav_server_host>/<username>",
-		insecure: true, // enable if you want to ignore SSL issues
-		username: "<username>",
-		password: "<password>",
+[
+	{
+		server: {
+			url: "https://<caldav_server_host>/<username>",
+			insecure: true, // enable if you want to ignore SSL issues
+			username: "<username>",
+			password: "<password>",
+		},
+		calendars: ["<calendar_name>", ...]
 	},
-	calendars: ["<calendar_name>", ...]
-}
+	...
+]
 ```
 
 ## Usage
 
 ```sh
-./schedule-manager -config <path/to/config.json5>
+./schedule-statistics -config <path/to/config.json5> serve
 ```
 
 ## Build

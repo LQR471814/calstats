@@ -20,8 +20,11 @@ message Event {
 // Calendar
 message CalendarRequest {}
 message CalendarResponse {
-  string calendar_server = 1;
-  repeated string names = 2;
+  message Source {
+    string calendar_server = 1;
+    repeated string names = 2;
+  }
+  repeated Source sources = 1;
 }
 
 // Events
@@ -34,6 +37,8 @@ message EventsResponse {
   repeated string tags = 2;
   repeated Event events = 3;
 }
+
+// 
 
 service CalendarService {
   rpc Calendar(CalendarRequest) returns (CalendarResponse);

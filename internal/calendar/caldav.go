@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
-	"schedule-manager/internal/tel"
+	"schedule-statistics/internal/tel"
 	"time"
 
 	"github.com/emersion/go-ical"

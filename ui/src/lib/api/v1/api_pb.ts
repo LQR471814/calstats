@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file v1/api.proto.
  */
 export const file_v1_api: GenFile = /*@__PURE__*/
-  fileDesc("Cgx2MS9hcGkucHJvdG8iXgoISW50ZXJ2YWwSKQoFc3RhcnQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEicKA2VuZBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAibQoFRXZlbnQSDAoEbmFtZRgBIAEoDRIMCgR0YWdzGAIgAygNEhsKCGludGVydmFsGAMgASgLMgkuSW50ZXJ2YWwSKwoIZHVyYXRpb24YBCABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24iEQoPQ2FsZW5kYXJSZXF1ZXN0IjoKEENhbGVuZGFyUmVzcG9uc2USFwoPY2FsZW5kYXJfc2VydmVyGAEgASgJEg0KBW5hbWVzGAIgAygJIj4KDUV2ZW50c1JlcXVlc3QSGwoIaW50ZXJ2YWwYASABKAsyCS5JbnRlcnZhbBIQCgh0aW1lem9uZRgCIAEoCSJLCg5FdmVudHNSZXNwb25zZRITCgtldmVudF9uYW1lcxgBIAMoCRIMCgR0YWdzGAIgAygJEhYKBmV2ZW50cxgDIAMoCzIGLkV2ZW50Mm0KD0NhbGVuZGFyU2VydmljZRIvCghDYWxlbmRhchIQLkNhbGVuZGFyUmVxdWVzdBoRLkNhbGVuZGFyUmVzcG9uc2USKQoGRXZlbnRzEg4uRXZlbnRzUmVxdWVzdBoPLkV2ZW50c1Jlc3BvbnNlYgZwcm90bzM", [file_google_protobuf_timestamp, file_google_protobuf_duration]);
+  fileDesc("Cgx2MS9hcGkucHJvdG8iXgoISW50ZXJ2YWwSKQoFc3RhcnQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEicKA2VuZBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAibQoFRXZlbnQSDAoEbmFtZRgBIAEoDRIMCgR0YWdzGAIgAygNEhsKCGludGVydmFsGAMgASgLMgkuSW50ZXJ2YWwSKwoIZHVyYXRpb24YBCABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24iEQoPQ2FsZW5kYXJSZXF1ZXN0Im8KEENhbGVuZGFyUmVzcG9uc2USKQoHc291cmNlcxgBIAMoCzIYLkNhbGVuZGFyUmVzcG9uc2UuU291cmNlGjAKBlNvdXJjZRIXCg9jYWxlbmRhcl9zZXJ2ZXIYASABKAkSDQoFbmFtZXMYAiADKAkiPgoNRXZlbnRzUmVxdWVzdBIbCghpbnRlcnZhbBgBIAEoCzIJLkludGVydmFsEhAKCHRpbWV6b25lGAIgASgJIksKDkV2ZW50c1Jlc3BvbnNlEhMKC2V2ZW50X25hbWVzGAEgAygJEgwKBHRhZ3MYAiADKAkSFgoGZXZlbnRzGAMgAygLMgYuRXZlbnQybQoPQ2FsZW5kYXJTZXJ2aWNlEi8KCENhbGVuZGFyEhAuQ2FsZW5kYXJSZXF1ZXN0GhEuQ2FsZW5kYXJSZXNwb25zZRIpCgZFdmVudHMSDi5FdmVudHNSZXF1ZXN0Gg8uRXZlbnRzUmVzcG9uc2ViBnByb3RvMw", [file_google_protobuf_timestamp, file_google_protobuf_duration]);
 
 /**
  * @generated from message Interval
@@ -92,6 +92,23 @@ export const CalendarRequestSchema: GenMessage<CalendarRequest> = /*@__PURE__*/
  */
 export type CalendarResponse = Message<"CalendarResponse"> & {
   /**
+   * @generated from field: repeated CalendarResponse.Source sources = 1;
+   */
+  sources: CalendarResponse_Source[];
+};
+
+/**
+ * Describes the message CalendarResponse.
+ * Use `create(CalendarResponseSchema)` to create a new message.
+ */
+export const CalendarResponseSchema: GenMessage<CalendarResponse> = /*@__PURE__*/
+  messageDesc(file_v1_api, 3);
+
+/**
+ * @generated from message CalendarResponse.Source
+ */
+export type CalendarResponse_Source = Message<"CalendarResponse.Source"> & {
+  /**
    * @generated from field: string calendar_server = 1;
    */
   calendarServer: string;
@@ -103,11 +120,11 @@ export type CalendarResponse = Message<"CalendarResponse"> & {
 };
 
 /**
- * Describes the message CalendarResponse.
- * Use `create(CalendarResponseSchema)` to create a new message.
+ * Describes the message CalendarResponse.Source.
+ * Use `create(CalendarResponse_SourceSchema)` to create a new message.
  */
-export const CalendarResponseSchema: GenMessage<CalendarResponse> = /*@__PURE__*/
-  messageDesc(file_v1_api, 3);
+export const CalendarResponse_SourceSchema: GenMessage<CalendarResponse_Source> = /*@__PURE__*/
+  messageDesc(file_v1_api, 3, 0);
 
 /**
  * Events

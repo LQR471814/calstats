@@ -3,50 +3,26 @@ package main
 import (
 	"context"
 	"embed"
-	"flag"
 	"fmt"
 	"io/fs"
 	"net/http"
 	"os"
 	"os/signal"
-	"schedule-manager/api/v1/v1connect"
-	"schedule-manager/internal/calendar"
-	"schedule-manager/internal/tel"
+	"schedule-statistics/api/v1/v1connect"
+	"schedule-statistics/internal/calendar"
+	"schedule-statistics/internal/tel"
 	"slices"
 	"time"
 
 	"connectrpc.com/connect"
 	connectcors "connectrpc.com/cors"
+	"github.com/hujun-open/cobra"
+	"github.com/hujun-open/myflags/v2"
 	"github.com/rs/cors"
 	"github.com/titanous/json5"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
-
-type ServerConfig struct {
-	Url      string `json:"url"`
-	Insecure bool   `json:"insecure"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-type Config struct {
-	Server    ServerConfig `json:"server"`
-	Calendars []string     `json:"calendars"`
-}
-
-func readConfig(path string) (Config, error) {
-	contents, err := os.ReadFile(path)
-	if err != nil {
-		return Config{}, err
-	}
-	var cfg Config
-	err = json5.Unmarshal(contents, &cfg)
-	if err != nil {
-		return Config{}, err
-	}
-	return cfg, nil
-}
 
 func fatalerr(msg string, args ...any) {
 	tel.Log.Error("main", msg, args...)
@@ -112,41 +88,65 @@ func withCORS(connectHandler http.Handler) http.Handler {
 //go:embed ui/dist/*
 var ui embed.FS
 
-func main() {
-	cfgPath := flag.String("config", "config.json5", "Configuration path.")
-	port := flag.Int("port", 3000, "The port to host on.")
-	debug := flag.Bool("debug", false, "Print the contents of the configured calendar and exit.")
-	flag.Parse()
+type cliServe struct {
+	Port int `usage:"The port to host on."`
+}
 
-	cfg, err := readConfig(*cfgPath)
+type Cli struct {
+	Config string   `usage:"Configuration file path."`
+	Serve  cliServe `action:"RunServe" usage:"Serve UI and API."`
+	Debug  struct{} `action:"RunDebug" usage:"Print events from calendar."`
+}
+
+func (c Cli) readConfig() Config {
+	contents, err := os.ReadFile(c.Config)
 	if err != nil {
 		fatalerr("read config", "err", err)
 	}
+	var cfg Config
+	err = json5.Unmarshal(contents, &cfg)
+	if err != nil {
+		fatalerr("read config", "err", err)
+	}
+	return cfg
+}
 
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer cancel()
-
-	source, err := calendar.NewCaldav(cfg.Server.Url, calendar.CaldavOptions{
-		Username: cfg.Server.Username,
-		Password: cfg.Server.Password,
+func (c Cli) getCalendar(cfg ServerConfig) calendar.Source {
+	source, err := calendar.NewCaldav(cfg.Url, calendar.CaldavOptions{
+		Username: cfg.Username,
+		Password: cfg.Password,
 		Insecure: true,
 	})
 	if err != nil {
 		fatalerr("create caldav source", "err", err)
 	}
+	return source
+}
 
-	if *debug {
-		for _, cal := range cfg.Calendars {
+func (c Cli) RunDebug(cmd *cobra.Command, args []string) {
+	ctx := cmd.Context()
+
+	cfg := c.readConfig()
+	for _, src := range cfg {
+		source := c.getCalendar(src.Server)
+		for _, cal := range src.Calendars {
 			tel.Log.Info("main", "===========", "calendar", cal)
-			err = printCal(ctx, source, cal)
+			err := printCal(ctx, source, cal)
 			if err != nil {
 				fatalerr("print calendar", "err", err)
 			}
 		}
-		return
 	}
+}
 
-	tel.Log.Info("main", "listening on...", "port", *port)
+func (c Cli) RunServe(cmd *cobra.Command, args []string) {
+	ctx, cancel := signal.NotifyContext(cmd.Context(), os.Interrupt)
+	defer cancel()
+
+	cfg := c.readConfig()
+	port := c.Serve.Port
+
+	tel.Log.Info("main", "listening on...", "port", c.Serve.Port)
 
 	mux := http.NewServeMux()
 
@@ -156,12 +156,14 @@ func main() {
 	}
 	mux.Handle("/", http.FileServerFS(buildFs))
 
+	sources := make([]source, len(cfg))
+	for i, src := range cfg {
+		c.getCalendar(src.Server)
+		sources[i] = source{}
+	}
+
 	handle, handler := v1connect.NewCalendarServiceHandler(
-		CalendarService{
-			calendars:      cfg.Calendars,
-			calendarServer: cfg.Server.Url,
-			source:         source,
-		},
+		CalendarService{},
 		connect.WithInterceptors(
 			connect.UnaryInterceptorFunc(tel.LogErrorsInterceptor),
 		),
@@ -169,7 +171,7 @@ func main() {
 	mux.Handle(handle, withCORS(handler))
 
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", *port),
+		Addr:    fmt.Sprintf(":%d", port),
 		Handler: h2c.NewHandler(mux, &http2.Server{}),
 	}
 	go func() {
@@ -180,4 +182,23 @@ func main() {
 	}()
 
 	<-ctx.Done()
+}
+
+func main() {
+	cli := Cli{
+		Config: "config.json5",
+		Serve: cliServe{
+			Port: 3000,
+		},
+	}
+
+	filler := myflags.NewFiller("schedule-statistics", "view schedule statistics with ease")
+	err := filler.Fill(&cli)
+	if err != nil {
+		fatalerr("parse cli args", "err", err)
+	}
+	err = filler.Execute()
+	if err != nil {
+		fatalerr("exec command", "err", err)
+	}
 }
