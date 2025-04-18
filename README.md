@@ -1,4 +1,4 @@
-# schedule-statistics
+# schedule-utils
 
 > Visualize the usage of your time given a schedule.
 
@@ -25,7 +25,7 @@
 ## Usage
 
 ```sh
-./schedule-statistics --config <path/to/config.json5> serve
+./schedule-utils --config <path/to/config.json5> serve
 ```
 
 ## Build

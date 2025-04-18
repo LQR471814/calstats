@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"schedule-statistics/api/v1/v1connect"
-	"schedule-statistics/internal/calendar"
-	"schedule-statistics/internal/tel"
+	"schedule-utils/api/v1/v1connect"
+	"schedule-utils/internal/calendar"
+	"schedule-utils/internal/tel"
 	"slices"
 	"time"
 
@@ -192,7 +192,7 @@ func main() {
 		},
 	}
 
-	filler := myflags.NewFiller("schedule-statistics", "view schedule statistics with ease")
+	filler := myflags.NewFiller("schedule-utils", "view schedule statistics with ease")
 	err := filler.Fill(&cli)
 	if err != nil {
 		fatalerr("parse cli args", "err", err)

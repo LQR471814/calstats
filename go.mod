@@ -1,4 +1,4 @@
-module schedule-statistics
+module schedule-utils
 
 go 1.23.4
 
