@@ -6,12 +6,6 @@ import (
 	"time"
 )
 
-func equalEvents(a, b calendar.Event) bool {
-	return a.Name == b.Name &&
-		a.Start.Equal(b.Start) &&
-		a.End.Equal(b.End)
-}
-
 func TestLayerEvents(t *testing.T) {
 	type testCase struct {
 		input  []calendar.Event
@@ -25,39 +19,39 @@ func TestLayerEvents(t *testing.T) {
 	table := []testCase{
 		{
 			input: []calendar.Event{
-				calendar.NewEvent("A", datetime(9, 30), datetime(10, 0), nil),
-				calendar.NewEvent("B", datetime(9, 30), datetime(9, 45), nil),
-				calendar.NewEvent("C", datetime(9, 50), datetime(10, 0), nil),
+				calendar.Event{Uid: "1", Name: "A", Tags: nil, Start: datetime(9, 30), End: datetime(10, 0)},
+				calendar.Event{Uid: "2", Name: "B", Tags: nil, Start: datetime(9, 30), End: datetime(9, 45)},
+				calendar.Event{Uid: "3", Name: "C", Tags: nil, Start: datetime(9, 50), End: datetime(10, 0)},
 			},
 			expect: []calendar.Event{
-				calendar.NewEvent("B", datetime(9, 30), datetime(9, 45), nil),
-				calendar.NewEvent("A", datetime(9, 45), datetime(9, 50), nil),
-				calendar.NewEvent("C", datetime(9, 50), datetime(10, 0), nil),
+				calendar.Event{Uid: "1", Name: "B", Tags: nil, Start: datetime(9, 30), End: datetime(9, 45)},
+				calendar.Event{Uid: "2", Name: "A", Tags: nil, Start: datetime(9, 45), End: datetime(9, 50)},
+				calendar.Event{Uid: "3", Name: "C", Tags: nil, Start: datetime(9, 50), End: datetime(10, 0)},
 			},
 		},
 		{
 			input: []calendar.Event{
-				calendar.NewEvent("A", datetime(9, 0), datetime(9, 15), nil),
-				calendar.NewEvent("B", datetime(9, 15), datetime(9, 30), nil),
-				calendar.NewEvent("C", datetime(9, 30), datetime(9, 45), nil),
+				calendar.Event{Uid: "1", Name: "A", Tags: nil, Start: datetime(9, 0), End: datetime(9, 15)},
+				calendar.Event{Uid: "2", Name: "B", Tags: nil, Start: datetime(9, 15), End: datetime(9, 30)},
+				calendar.Event{Uid: "3", Name: "C", Tags: nil, Start: datetime(9, 30), End: datetime(9, 45)},
 			},
 			expect: []calendar.Event{
-				calendar.NewEvent("A", datetime(9, 0), datetime(9, 15), nil),
-				calendar.NewEvent("B", datetime(9, 15), datetime(9, 30), nil),
-				calendar.NewEvent("C", datetime(9, 30), datetime(9, 45), nil),
+				calendar.Event{Uid: "1", Name: "A", Tags: nil, Start: datetime(9, 0), End: datetime(9, 15)},
+				calendar.Event{Uid: "2", Name: "B", Tags: nil, Start: datetime(9, 15), End: datetime(9, 30)},
+				calendar.Event{Uid: "3", Name: "C", Tags: nil, Start: datetime(9, 30), End: datetime(9, 45)},
 			},
 		},
 		{
 			input: []calendar.Event{
-				calendar.NewEvent("A", datetime(9, 0), datetime(9, 15), nil),
-				calendar.NewEvent("B", datetime(9, 15), datetime(9, 45), nil),
-				calendar.NewEvent("C", datetime(9, 30), datetime(9, 40), nil),
+				calendar.Event{Uid: "1", Name: "A", Tags: nil, Start: datetime(9, 0), End: datetime(9, 15)},
+				calendar.Event{Uid: "2", Name: "B", Tags: nil, Start: datetime(9, 15), End: datetime(9, 45)},
+				calendar.Event{Uid: "3", Name: "C", Tags: nil, Start: datetime(9, 30), End: datetime(9, 40)},
 			},
 			expect: []calendar.Event{
-				calendar.NewEvent("A", datetime(9, 0), datetime(9, 15), nil),
-				calendar.NewEvent("B", datetime(9, 15), datetime(9, 30), nil),
-				calendar.NewEvent("C", datetime(9, 30), datetime(9, 40), nil),
-				calendar.NewEvent("B", datetime(9, 40), datetime(9, 45), nil),
+				calendar.Event{Uid: "1", Name: "A", Tags: nil, Start: datetime(9, 0), End: datetime(9, 15)},
+				calendar.Event{Uid: "2", Name: "B", Tags: nil, Start: datetime(9, 15), End: datetime(9, 30)},
+				calendar.Event{Uid: "3", Name: "C", Tags: nil, Start: datetime(9, 30), End: datetime(9, 40)},
+				calendar.Event{Uid: "2", Name: "B", Tags: nil, Start: datetime(9, 40), End: datetime(9, 45)},
 			},
 		},
 	}
@@ -86,4 +80,10 @@ func TestLayerEvents(t *testing.T) {
 			}
 		}
 	}
+}
+
+func equalEvents(a, b calendar.Event) bool {
+	return a.Name == b.Name &&
+		a.Start.Equal(b.Start) &&
+		a.End.Equal(b.End)
 }

@@ -9,12 +9,20 @@ message Interval {
 }
 
 message Event {
+  uint32 id = 1;
   // the name is an index for the lookup table of event names
-  uint32 name = 1;
+  uint32 name = 2;
+  string location = 3;
+  string description = 4;
   // each element is an index for the lookup table of tag names
-  repeated uint32 tags = 2;
-  Interval interval = 3;
-  google.protobuf.Duration duration = 4;
+  repeated uint32 tags = 5;
+  Interval interval = 6;
+  google.protobuf.Duration duration = 7;
+  oneof trigger {
+    google.protobuf.Duration relative = 8;
+    google.protobuf.Timestamp absolute = 9;
+    bool none = 10;
+  }
 }
 
 // Calendar
@@ -38,10 +46,24 @@ message EventsResponse {
   repeated Event events = 3;
 }
 
-// 
+// UpdateEvents
+message UpdateEventsRequest {
+  message UpdatedEvent {
+    uint32 id = 1;
+    optional string name = 2;
+    optional string location = 3;
+    message Tags {
+      repeated string values = 1;
+    }
+    optional Tags tags = 4;
+  }
+  repeated UpdatedEvent updated = 1;
+}
+message UpdateEventsResponse {}
 
 service CalendarService {
   rpc Calendar(CalendarRequest) returns (CalendarResponse);
   rpc Events(EventsRequest) returns (EventsResponse);
+  rpc UpdateEvents(UpdateEventsRequest) returns (UpdateEventsResponse);
 }
 

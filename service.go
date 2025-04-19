@@ -7,6 +7,7 @@ import (
 	v1 "schedule-utils/api/v1"
 	"schedule-utils/internal/calendar"
 	"slices"
+	"sync"
 	"time"
 
 	"connectrpc.com/connect"
@@ -14,22 +15,157 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+type CalendarService struct {
+	mutex       sync.Mutex
+	eventLookup []eventRef
+	sources     []source
+}
+
+type eventRef struct {
+	cal *calendar.Calendar
+	uid string
+}
+
 type source struct {
-	cal       calendar.Source
+	calendar.Source
 	serverUrl string
 	calendars []string
 }
 
-type CalendarService struct {
-	sources []source
+func NewCalendarService(sources []source) *CalendarService {
+	return &CalendarService{
+		sources: sources,
+	}
 }
 
-func prettyPrint(value any) string {
-	expected, err := json.MarshalIndent(value, "", "  ")
-	if err != nil {
-		panic(err)
+func (s *CalendarService) Events(ctx context.Context, req *connect.Request[v1.EventsRequest]) (*connect.Response[v1.EventsResponse], error) {
+	defer s.mutex.Unlock()
+	s.mutex.Lock()
+
+	tagIdxTable := map[string]uint32{}
+	nameIdxTable := map[string]uint32{}
+	curTagIdx := uint32(0)
+	curNameIdx := uint32(0)
+
+	var pbEvents []*v1.Event
+
+	for _, source := range s.sources {
+		cals, err := source.Calendars(ctx)
+		if err != nil {
+			return nil, err
+		}
+		var filtered []calendar.Calendar
+		for _, c := range cals {
+			if slices.Contains(source.calendars, c.Name) {
+				filtered = append(filtered, c)
+			}
+		}
+		if len(filtered) == 0 {
+			return nil, fmt.Errorf("find calendar: not found '%s'", source.calendars)
+		}
+
+		tzId := req.Msg.Timezone
+		tz, err := time.LoadLocation(tzId)
+		if err != nil {
+			return nil, fmt.Errorf("load timezone: %w", err)
+		}
+
+		for _, cal := range filtered {
+			eventList, err := source.Events(
+				ctx, cal,
+				req.Msg.Interval.Start.AsTime(),
+				req.Msg.Interval.End.AsTime(),
+				tz,
+			)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, event := range eventList {
+				var tags []uint32
+				if len(event.Tags) > 0 {
+					tags = make([]uint32, len(event.Tags))
+					for i, tagName := range event.Tags {
+						tagIdx, ok := tagIdxTable[tagName]
+						if !ok {
+							tagIdxTable[tagName] = curTagIdx
+							tagIdx = curTagIdx
+							curTagIdx++
+						}
+						tags[i] = tagIdx
+					}
+				}
+
+				id := len(s.eventLookup)
+				s.eventLookup = append(s.eventLookup, eventRef{
+					cal: &cal,
+					uid: event.Uid,
+				})
+
+				nameIdx, ok := nameIdxTable[event.Name]
+				if !ok {
+					nameIdxTable[event.Name] = curNameIdx
+					nameIdx = curNameIdx
+					curNameIdx++
+				}
+
+				eventOutput := &v1.Event{
+					Id:   uint32(id),
+					Name: nameIdx,
+					Tags: tags,
+					Interval: &v1.Interval{
+						Start: timestamppb.New(event.Start),
+						End:   timestamppb.New(event.End),
+					},
+					Duration: durationpb.New(event.Duration()),
+				}
+
+				pbEvents = append(pbEvents, eventOutput)
+			}
+		}
+
 	}
-	return string(expected)
+
+	slices.SortFunc(pbEvents, func(a, b *v1.Event) int {
+		diff := a.Interval.Start.AsTime().Compare(b.Interval.Start.AsTime())
+		if diff != 0 {
+			return diff
+		}
+		// longer events go first in the event that multiple events have the same start time
+		return -int(a.Duration.AsDuration() - b.Duration.AsDuration())
+	})
+
+	nameLookup := make([]string, len(nameIdxTable))
+	for name, i := range nameIdxTable {
+		nameLookup[int(i)] = name
+	}
+	tagLookup := make([]string, len(tagIdxTable))
+	for tag, i := range tagIdxTable {
+		tagLookup[int(i)] = tag
+	}
+
+	return connect.NewResponse(&v1.EventsResponse{
+		EventNames: nameLookup,
+		Tags:       tagLookup,
+		Events:     pbEvents,
+	}), nil
+}
+
+func (s *CalendarService) UpdateEvents(ctx context.Context, req *connect.Request[v1.UpdateEventsRequest]) (*connect.Response[v1.UpdateEventsResponse], error) {
+
+}
+
+func (s *CalendarService) Calendar(ctx context.Context, req *connect.Request[v1.CalendarRequest]) (*connect.Response[v1.CalendarResponse], error) {
+	sources := make([]*v1.CalendarResponse_Source, len(s.sources))
+	for i, s := range s.sources {
+		sources[i] = &v1.CalendarResponse_Source{
+			CalendarServer: s.serverUrl,
+			Names:          s.calendars,
+		}
+	}
+	return connect.NewResponse(&v1.CalendarResponse{
+		Sources: sources,
+	}), nil
 }
 
 func DeoverlapEvents(eventList *[]calendar.Event) {
@@ -66,12 +202,13 @@ func DeoverlapEvents(eventList *[]calendar.Event) {
 
 			events = slices.Insert(events, i+1, event{
 				id: i - 1,
-				Event: calendar.NewEvent(
-					a.Name,
-					b.End,
-					a.End,
-					a.Tags,
-				),
+				Event: calendar.Event{
+					Uid:   a.Uid,
+					Name:  a.Name,
+					Start: b.End,
+					End:   a.End,
+					Tags:  a.Tags,
+				},
 			})
 			a.End = b.Start
 			events[i-1] = a
@@ -130,114 +267,10 @@ func DeoverlapEvents(eventList *[]calendar.Event) {
 	*eventList = out
 }
 
-func (s CalendarService) Events(ctx context.Context, req *connect.Request[v1.EventsRequest]) (*connect.Response[v1.EventsResponse], error) {
-	tagIdxTable := map[string]uint32{}
-	nameIdxTable := map[string]uint32{}
-	curTagIdx := uint32(0)
-	curNameIdx := uint32(0)
-	var pbEvents []*v1.Event
-
-	for _, source := range s.sources {
-		calList, err := source.cal.Calendars(ctx)
-		if err != nil {
-			return nil, err
-		}
-		var cals []calendar.Calendar
-		for _, c := range calList {
-			if slices.Contains(source.calendars, c.Name) {
-				cals = append(cals, c)
-			}
-		}
-		if len(cals) == 0 {
-			return nil, fmt.Errorf("find calendar: not found '%s'", source.calendars)
-		}
-
-		tzId := req.Msg.Timezone
-		tz, err := time.LoadLocation(tzId)
-		if err != nil {
-			return nil, fmt.Errorf("load timezone: %w", err)
-		}
-
-		var eventList []calendar.Event
-		for _, c := range cals {
-			events, err := source.cal.Events(
-				ctx, c,
-				req.Msg.Interval.Start.AsTime(),
-				req.Msg.Interval.End.AsTime(),
-				tz,
-			)
-			if err != nil {
-				return nil, err
-			}
-			eventList = append(eventList, events...)
-		}
-
-		for _, event := range eventList {
-			var tags []uint32
-			if len(event.Tags) > 0 {
-				tags = make([]uint32, len(event.Tags))
-				for i, tagName := range event.Tags {
-					tagIdx, ok := tagIdxTable[tagName]
-					if !ok {
-						tagIdxTable[tagName] = curTagIdx
-						tagIdx = curTagIdx
-						curTagIdx++
-					}
-					tags[i] = tagIdx
-				}
-			}
-			nameIdx, ok := nameIdxTable[event.Name]
-			if !ok {
-				nameIdxTable[event.Name] = curNameIdx
-				nameIdx = curNameIdx
-				curNameIdx++
-			}
-			pbEvents = append(pbEvents, &v1.Event{
-				Name: nameIdx,
-				Tags: tags,
-				Interval: &v1.Interval{
-					Start: timestamppb.New(event.Start),
-					End:   timestamppb.New(event.End),
-				},
-				Duration: durationpb.New(event.Duration()),
-			})
-		}
+func prettyPrint(value any) string {
+	expected, err := json.MarshalIndent(value, "", "  ")
+	if err != nil {
+		panic(err)
 	}
-
-	slices.SortFunc(pbEvents, func(a, b *v1.Event) int {
-		diff := a.Interval.Start.AsTime().Compare(b.Interval.Start.AsTime())
-		if diff != 0 {
-			return diff
-		}
-		// longer events go first in the event that multiple events have the same start time
-		return -int(a.Duration.AsDuration() - b.Duration.AsDuration())
-	})
-
-	nameLookup := make([]string, len(nameIdxTable))
-	for n, idx := range nameIdxTable {
-		nameLookup[int(idx)] = n
-	}
-	tagLookup := make([]string, len(tagIdxTable))
-	for k, idx := range tagIdxTable {
-		tagLookup[int(idx)] = k
-	}
-
-	return connect.NewResponse(&v1.EventsResponse{
-		EventNames: nameLookup,
-		Tags:       tagLookup,
-		Events:     pbEvents,
-	}), nil
-}
-
-func (s CalendarService) Calendar(ctx context.Context, req *connect.Request[v1.CalendarRequest]) (*connect.Response[v1.CalendarResponse], error) {
-	sources := make([]*v1.CalendarResponse_Source, len(s.sources))
-	for i, s := range s.sources {
-		sources[i] = &v1.CalendarResponse_Source{
-			CalendarServer: s.serverUrl,
-			Names:          s.calendars,
-		}
-	}
-	return connect.NewResponse(&v1.CalendarResponse{
-		Sources: sources,
-	}), nil
+	return string(expected)
 }

@@ -68,16 +68,24 @@ func (c Caldav) Calendars(ctx context.Context) ([]Calendar, error) {
 	return out, nil
 }
 
+type caldavTrigger struct {
+	Relative time.Duration
+	Absolute time.Time
+}
+
 type caldavEvent struct {
-	Uid        string
-	Name       string
-	Categories []string
-	ExDates    []time.Time
-	Start, End time.Time
-	Duration   time.Duration
-	RRule      *rrule.RRule
-	RDates     string
-	RId        time.Time
+	Uid         string
+	Name        string
+	Location    string
+	Description string
+	Categories  []string
+	ExDates     []time.Time
+	Start, End  time.Time
+	Duration    time.Duration
+	RRule       *rrule.RRule
+	RDates      string
+	RId         time.Time
+	Trigger     caldavTrigger
 }
 
 func (c Caldav) parseEvents(objs []caldav.CalendarObject, intvEnd time.Time, tz *time.Location) []caldavEvent {
@@ -99,6 +107,12 @@ func (c Caldav) parseEvents(objs []caldav.CalendarObject, intvEnd time.Time, tz 
 				continue
 			}
 			uid := uidProp.Value
+
+			desc := ""
+			descProp := e.Props.Get(ical.PropDescription)
+			if descProp != nil {
+				desc = descProp.Value
+			}
 
 			catProp := e.Props.Get(ical.PropCategories)
 			var categories []string
@@ -186,6 +200,24 @@ func (c Caldav) parseEvents(objs []caldav.CalendarObject, intvEnd time.Time, tz 
 				}
 			}
 
+			var trigger caldavTrigger
+			triggerProp := e.Props.Get(ical.PropTrigger)
+			if triggerProp != nil {
+				var relerr error
+				trigger.Relative, relerr = triggerProp.Duration()
+
+				if err != nil {
+					trigger.Absolute, err = triggerProp.DateTime(tz)
+					if err != nil {
+						tel.Log.Warn(
+							"caldav", "parse trigger",
+							"datetime_parse_error", err,
+							"duration_parse_error", relerr,
+						)
+					}
+				}
+			}
+
 			events = append(events, caldavEvent{
 				Uid:        uid,
 				Name:       name,
@@ -199,6 +231,7 @@ func (c Caldav) parseEvents(objs []caldav.CalendarObject, intvEnd time.Time, tz 
 				RId:     recurId,
 				RRule:   rule,
 				RDates:  rdates,
+				Trigger: trigger,
 			})
 		}
 	}
@@ -238,12 +271,15 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 				Props: []string{
 					ical.PropUID,
 					ical.PropSummary,
+					ical.PropDescription,
+					ical.PropLocation,
 					ical.PropDateTimeStart,
 					ical.PropDateTimeEnd,
 					ical.PropCategories,
 					ical.PropRecurrenceDates,
 					ical.PropRecurrenceID,
 					ical.PropRecurrenceRule,
+					ical.PropTrigger,
 				},
 			}},
 		},
@@ -272,10 +308,12 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 			track.overrides = append(track.overrides, e)
 		} else { // single event
 			outev, ok := c.adjustEventBounds(Event{
-				Name:  e.Name,
-				Tags:  e.Categories,
-				Start: e.Start,
-				End:   e.End,
+				Uid:     e.Uid,
+				Name:    e.Name,
+				Tags:    e.Categories,
+				Start:   e.Start,
+				End:     e.End,
+				Trigger: EventTrigger(e.Trigger),
 			}, intvStart, intvEnd)
 			if ok {
 				out = append(out, outev)
@@ -305,10 +343,12 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 			for _, ov := range re.overrides {
 				if recurTime.Equal(ov.RId) {
 					outev, ok := c.adjustEventBounds(Event{
-						Name:  ov.Name,
-						Tags:  ov.Categories,
-						Start: ov.Start,
-						End:   ov.End,
+						Uid:     ov.Uid,
+						Name:    ov.Name,
+						Tags:    ov.Categories,
+						Start:   ov.Start,
+						End:     ov.End,
+						Trigger: EventTrigger(ov.Trigger),
 					}, intvStart, intvEnd)
 					if ok {
 						out = append(out, outev)
@@ -318,10 +358,12 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 			}
 
 			outev, ok := c.adjustEventBounds(Event{
-				Name:  re.original.Name,
-				Tags:  re.original.Categories,
-				Start: recurTime,
-				End:   recurTime.Add(re.original.Duration),
+				Uid:     re.original.Uid,
+				Name:    re.original.Name,
+				Tags:    re.original.Categories,
+				Start:   recurTime,
+				End:     recurTime.Add(re.original.Duration),
+				Trigger: EventTrigger(re.original.Trigger),
 			}, intvStart, intvEnd)
 			if ok {
 				out = append(out, outev)
@@ -330,4 +372,7 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 	}
 
 	return out, nil
+}
+
+func (c Caldav) UpdateEvents(ctx context.Context, calendar Calendar, events []UpdateEvent) error {
 }

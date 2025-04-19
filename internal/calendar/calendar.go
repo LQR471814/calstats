@@ -5,23 +5,27 @@ import (
 	"time"
 )
 
+type EventTrigger struct {
+	Relative time.Duration
+	Absolute time.Time
+}
+
+func (t EventTrigger) IsNull() bool {
+	return t.Relative == 0 && t.Absolute == (time.Time{})
+}
+
 type Event struct {
-	Name       string
-	Tags       []string
-	Start, End time.Time
+	Uid         string
+	Name        string
+	Location    string
+	Description string
+	Tags        []string
+	Start, End  time.Time
+	Trigger     EventTrigger
 }
 
 func (e Event) Duration() time.Duration {
 	return e.End.Sub(e.Start)
-}
-
-func NewEvent(name string, start, end time.Time, tags []string) Event {
-	return Event{
-		Name:  name,
-		Start: start,
-		End:   end,
-		Tags:  tags,
-	}
 }
 
 type Calendar struct {
@@ -29,7 +33,15 @@ type Calendar struct {
 	Name string
 }
 
+type UpdateEvent struct {
+	Uid      string
+	Name     string
+	Location string
+	Tags     []string
+}
+
 type Source interface {
 	Calendars(ctx context.Context) ([]Calendar, error)
 	Events(ctx context.Context, calendar Calendar, start, end time.Time, tz *time.Location) ([]Event, error)
+	UpdateEvents(ctx context.Context, calendar Calendar, updates []UpdateEvent) error
 }
