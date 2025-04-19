@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file v1/api.proto.
  */
 export const file_v1_api: GenFile = /*@__PURE__*/
-  fileDesc("Cgx2MS9hcGkucHJvdG8iXgoISW50ZXJ2YWwSKQoFc3RhcnQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEicKA2VuZBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAi8wEKBUV2ZW50EgoKAmlkGAEgASgNEgwKBG5hbWUYAiABKA0SDAoEdGFncxgDIAMoDRIbCghpbnRlcnZhbBgEIAEoCzIJLkludGVydmFsEisKCGR1cmF0aW9uGAUgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEi0KCHJlbGF0aXZlGAYgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uSAASLgoIYWJzb2x1dGUYByABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wSAASDgoEbm9uZRgIIAEoCEgAQgkKB3RyaWdnZXIiEQoPQ2FsZW5kYXJSZXF1ZXN0Im8KEENhbGVuZGFyUmVzcG9uc2USKQoHc291cmNlcxgBIAMoCzIYLkNhbGVuZGFyUmVzcG9uc2UuU291cmNlGjAKBlNvdXJjZRIXCg9jYWxlbmRhcl9zZXJ2ZXIYASABKAkSDQoFbmFtZXMYAiADKAkiPgoNRXZlbnRzUmVxdWVzdBIbCghpbnRlcnZhbBgBIAEoCzIJLkludGVydmFsEhAKCHRpbWV6b25lGAIgASgJIksKDkV2ZW50c1Jlc3BvbnNlEhMKC2V2ZW50X25hbWVzGAEgAygJEgwKBHRhZ3MYAiADKAkSFgoGZXZlbnRzGAMgAygLMgYuRXZlbnQiggIKE1VwZGF0ZUV2ZW50c1JlcXVlc3QSMgoHdXBkYXRlZBgBIAMoCzIhLlVwZGF0ZUV2ZW50c1JlcXVlc3QuVXBkYXRlZEV2ZW50GrYBCgxVcGRhdGVkRXZlbnQSCgoCaWQYASABKA0SEQoEbmFtZRgCIAEoCUgAiAEBEhUKCGxvY2F0aW9uGAMgASgJSAGIAQESOQoEdGFncxgEIAEoCzImLlVwZGF0ZUV2ZW50c1JlcXVlc3QuVXBkYXRlZEV2ZW50LlRhZ3NIAogBARoWCgRUYWdzEg4KBnZhbHVlcxgBIAMoCUIHCgVfbmFtZUILCglfbG9jYXRpb25CBwoFX3RhZ3MiFgoUVXBkYXRlRXZlbnRzUmVzcG9uc2UyqgEKD0NhbGVuZGFyU2VydmljZRIvCghDYWxlbmRhchIQLkNhbGVuZGFyUmVxdWVzdBoRLkNhbGVuZGFyUmVzcG9uc2USKQoGRXZlbnRzEg4uRXZlbnRzUmVxdWVzdBoPLkV2ZW50c1Jlc3BvbnNlEjsKDFVwZGF0ZUV2ZW50cxIULlVwZGF0ZUV2ZW50c1JlcXVlc3QaFS5VcGRhdGVFdmVudHNSZXNwb25zZWIGcHJvdG8z", [file_google_protobuf_timestamp, file_google_protobuf_duration]);
+  fileDesc("Cgx2MS9hcGkucHJvdG8iXgoISW50ZXJ2YWwSKQoFc3RhcnQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEicKA2VuZBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAimgIKBUV2ZW50EgoKAmlkGAEgASgNEgwKBG5hbWUYAiABKA0SEAoIbG9jYXRpb24YAyABKAkSEwoLZGVzY3JpcHRpb24YBCABKAkSDAoEdGFncxgFIAMoDRIbCghpbnRlcnZhbBgGIAEoCzIJLkludGVydmFsEisKCGR1cmF0aW9uGAcgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEi0KCHJlbGF0aXZlGAggASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uSAASLgoIYWJzb2x1dGUYCSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wSAASDgoEbm9uZRgKIAEoCEgAQgkKB3RyaWdnZXIiEQoPQ2FsZW5kYXJSZXF1ZXN0Im8KEENhbGVuZGFyUmVzcG9uc2USKQoHc291cmNlcxgBIAMoCzIYLkNhbGVuZGFyUmVzcG9uc2UuU291cmNlGjAKBlNvdXJjZRIXCg9jYWxlbmRhcl9zZXJ2ZXIYASABKAkSDQoFbmFtZXMYAiADKAkiPgoNRXZlbnRzUmVxdWVzdBIbCghpbnRlcnZhbBgBIAEoCzIJLkludGVydmFsEhAKCHRpbWV6b25lGAIgASgJIksKDkV2ZW50c1Jlc3BvbnNlEhMKC2V2ZW50X25hbWVzGAEgAygJEgwKBHRhZ3MYAiADKAkSFgoGZXZlbnRzGAMgAygLMgYuRXZlbnQiggIKE1VwZGF0ZUV2ZW50c1JlcXVlc3QSMgoHdXBkYXRlZBgBIAMoCzIhLlVwZGF0ZUV2ZW50c1JlcXVlc3QuVXBkYXRlZEV2ZW50GrYBCgxVcGRhdGVkRXZlbnQSCgoCaWQYASABKA0SEQoEbmFtZRgCIAEoCUgAiAEBEhUKCGxvY2F0aW9uGAMgASgJSAGIAQESOQoEdGFncxgEIAEoCzImLlVwZGF0ZUV2ZW50c1JlcXVlc3QuVXBkYXRlZEV2ZW50LlRhZ3NIAogBARoWCgRUYWdzEg4KBnZhbHVlcxgBIAMoCUIHCgVfbmFtZUILCglfbG9jYXRpb25CBwoFX3RhZ3MiFgoUVXBkYXRlRXZlbnRzUmVzcG9uc2UyqgEKD0NhbGVuZGFyU2VydmljZRIvCghDYWxlbmRhchIQLkNhbGVuZGFyUmVxdWVzdBoRLkNhbGVuZGFyUmVzcG9uc2USKQoGRXZlbnRzEg4uRXZlbnRzUmVxdWVzdBoPLkV2ZW50c1Jlc3BvbnNlEjsKDFVwZGF0ZUV2ZW50cxIULlVwZGF0ZUV2ZW50c1JlcXVlc3QaFS5VcGRhdGVFdmVudHNSZXNwb25zZWIGcHJvdG8z", [file_google_protobuf_timestamp, file_google_protobuf_duration]);
 
 /**
  * @generated from message Interval
@@ -53,19 +53,29 @@ export type Event = Message<"Event"> & {
   name: number;
 
   /**
+   * @generated from field: string location = 3;
+   */
+  location: string;
+
+  /**
+   * @generated from field: string description = 4;
+   */
+  description: string;
+
+  /**
    * each element is an index for the lookup table of tag names
    *
-   * @generated from field: repeated uint32 tags = 3;
+   * @generated from field: repeated uint32 tags = 5;
    */
   tags: number[];
 
   /**
-   * @generated from field: Interval interval = 4;
+   * @generated from field: Interval interval = 6;
    */
   interval?: Interval;
 
   /**
-   * @generated from field: google.protobuf.Duration duration = 5;
+   * @generated from field: google.protobuf.Duration duration = 7;
    */
   duration?: Duration;
 
@@ -74,19 +84,19 @@ export type Event = Message<"Event"> & {
    */
   trigger: {
     /**
-     * @generated from field: google.protobuf.Duration relative = 6;
+     * @generated from field: google.protobuf.Duration relative = 8;
      */
     value: Duration;
     case: "relative";
   } | {
     /**
-     * @generated from field: google.protobuf.Timestamp absolute = 7;
+     * @generated from field: google.protobuf.Timestamp absolute = 9;
      */
     value: Timestamp;
     case: "absolute";
   } | {
     /**
-     * @generated from field: bool none = 8;
+     * @generated from field: bool none = 10;
      */
     value: boolean;
     case: "none";

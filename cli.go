@@ -1,6 +1,9 @@
 package main
 
 import (
+	"calutil/api/v1/v1connect"
+	"calutil/internal/calendar"
+	"calutil/internal/tel"
 	"context"
 	"embed"
 	"fmt"
@@ -8,9 +11,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"schedule-utils/api/v1/v1connect"
-	"schedule-utils/internal/calendar"
-	"schedule-utils/internal/tel"
 	"slices"
 	"time"
 

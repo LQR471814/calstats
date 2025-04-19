@@ -1,7 +1,7 @@
 package main
 
 import (
-	"schedule-utils/internal/calendar"
+	"calutil/internal/calendar"
 	"testing"
 	"time"
 )

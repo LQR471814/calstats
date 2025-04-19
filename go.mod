@@ -1,4 +1,4 @@
-module schedule-utils
+module calutil
 
 go 1.23.4
 

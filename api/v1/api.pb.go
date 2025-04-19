@@ -79,11 +79,13 @@ type Event struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	Id    uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	// the name is an index for the lookup table of event names
-	Name uint32 `protobuf:"varint,2,opt,name=name,proto3" json:"name,omitempty"`
+	Name        uint32 `protobuf:"varint,2,opt,name=name,proto3" json:"name,omitempty"`
+	Location    string `protobuf:"bytes,3,opt,name=location,proto3" json:"location,omitempty"`
+	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
 	// each element is an index for the lookup table of tag names
-	Tags     []uint32             `protobuf:"varint,3,rep,packed,name=tags,proto3" json:"tags,omitempty"`
-	Interval *Interval            `protobuf:"bytes,4,opt,name=interval,proto3" json:"interval,omitempty"`
-	Duration *durationpb.Duration `protobuf:"bytes,5,opt,name=duration,proto3" json:"duration,omitempty"`
+	Tags     []uint32             `protobuf:"varint,5,rep,packed,name=tags,proto3" json:"tags,omitempty"`
+	Interval *Interval            `protobuf:"bytes,6,opt,name=interval,proto3" json:"interval,omitempty"`
+	Duration *durationpb.Duration `protobuf:"bytes,7,opt,name=duration,proto3" json:"duration,omitempty"`
 	// Types that are valid to be assigned to Trigger:
 	//
 	//	*Event_Relative
@@ -136,6 +138,20 @@ func (x *Event) GetName() uint32 {
 		return x.Name
 	}
 	return 0
+}
+
+func (x *Event) GetLocation() string {
+	if x != nil {
+		return x.Location
+	}
+	return ""
+}
+
+func (x *Event) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
 }
 
 func (x *Event) GetTags() []uint32 {
@@ -198,15 +214,15 @@ type isEvent_Trigger interface {
 }
 
 type Event_Relative struct {
-	Relative *durationpb.Duration `protobuf:"bytes,6,opt,name=relative,proto3,oneof"`
+	Relative *durationpb.Duration `protobuf:"bytes,8,opt,name=relative,proto3,oneof"`
 }
 
 type Event_Absolute struct {
-	Absolute *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=absolute,proto3,oneof"`
+	Absolute *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=absolute,proto3,oneof"`
 }
 
 type Event_None struct {
-	None bool `protobuf:"varint,8,opt,name=none,proto3,oneof"`
+	None bool `protobuf:"varint,10,opt,name=none,proto3,oneof"`
 }
 
 func (*Event_Relative) isEvent_Trigger() {}
@@ -661,16 +677,19 @@ const file_v1_api_proto_rawDesc = "" +
 	"\fv1/api.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/duration.proto\"j\n" +
 	"\bInterval\x120\n" +
 	"\x05start\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\x05start\x12,\n" +
-	"\x03end\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x03end\"\xb1\x02\n" +
+	"\x03end\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x03end\"\xef\x02\n" +
 	"\x05Event\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\rR\x04name\x12\x12\n" +
-	"\x04tags\x18\x03 \x03(\rR\x04tags\x12%\n" +
-	"\binterval\x18\x04 \x01(\v2\t.IntervalR\binterval\x125\n" +
-	"\bduration\x18\x05 \x01(\v2\x19.google.protobuf.DurationR\bduration\x127\n" +
-	"\brelative\x18\x06 \x01(\v2\x19.google.protobuf.DurationH\x00R\brelative\x128\n" +
-	"\babsolute\x18\a \x01(\v2\x1a.google.protobuf.TimestampH\x00R\babsolute\x12\x14\n" +
-	"\x04none\x18\b \x01(\bH\x00R\x04noneB\t\n" +
+	"\x04name\x18\x02 \x01(\rR\x04name\x12\x1a\n" +
+	"\blocation\x18\x03 \x01(\tR\blocation\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x12\n" +
+	"\x04tags\x18\x05 \x03(\rR\x04tags\x12%\n" +
+	"\binterval\x18\x06 \x01(\v2\t.IntervalR\binterval\x125\n" +
+	"\bduration\x18\a \x01(\v2\x19.google.protobuf.DurationR\bduration\x127\n" +
+	"\brelative\x18\b \x01(\v2\x19.google.protobuf.DurationH\x00R\brelative\x128\n" +
+	"\babsolute\x18\t \x01(\v2\x1a.google.protobuf.TimestampH\x00R\babsolute\x12\x14\n" +
+	"\x04none\x18\n" +
+	" \x01(\bH\x00R\x04noneB\t\n" +
 	"\atrigger\"\x11\n" +
 	"\x0fCalendarRequest\"\x8f\x01\n" +
 	"\x10CalendarResponse\x122\n" +
@@ -702,7 +721,7 @@ const file_v1_api_proto_rawDesc = "" +
 	"\x0fCalendarService\x12/\n" +
 	"\bCalendar\x12\x10.CalendarRequest\x1a\x11.CalendarResponse\x12)\n" +
 	"\x06Events\x12\x0e.EventsRequest\x1a\x0f.EventsResponse\x12;\n" +
-	"\fUpdateEvents\x12\x14.UpdateEventsRequest\x1a\x15.UpdateEventsResponseB#B\bApiProtoP\x01Z\x15schedule-utils/api/v1b\x06proto3"
+	"\fUpdateEvents\x12\x14.UpdateEventsRequest\x1a\x15.UpdateEventsResponseB\x1cB\bApiProtoP\x01Z\x0ecalutil/api/v1b\x06proto3"
 
 var (
 	file_v1_api_proto_rawDescOnce sync.Once
