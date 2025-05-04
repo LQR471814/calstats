@@ -1,11 +1,11 @@
 package main
 
 import (
+	v1 "calutil/api/v1"
+	"calutil/internal/calendar"
 	"context"
 	"encoding/json"
 	"fmt"
-	v1 "calutil/api/v1"
-	"calutil/internal/calendar"
 	"slices"
 	"sync"
 	"time"
@@ -110,14 +110,25 @@ func (s *CalendarService) Events(ctx context.Context, req *connect.Request[v1.Ev
 				}
 
 				eventOutput := &v1.Event{
-					Id:   uint32(id),
-					Name: nameIdx,
-					Tags: tags,
+					Id:          uint32(id),
+					Name:        nameIdx,
+					Location:    event.Location,
+					Description: event.Description,
+					Tags:        tags,
 					Interval: &v1.Interval{
 						Start: timestamppb.New(event.Start),
 						End:   timestamppb.New(event.End),
 					},
 					Duration: durationpb.New(event.Duration()),
+				}
+				if event.Trigger.Absolute != (time.Time{}) {
+					eventOutput.Trigger = &v1.Event_Absolute{
+						Absolute: timestamppb.New(event.Trigger.Absolute),
+					}
+				} else if event.Trigger.NotNone {
+					eventOutput.Trigger = &v1.Event_Relative{
+						Relative: durationpb.New(event.Trigger.Relative),
+					}
 				}
 
 				pbEvents = append(pbEvents, eventOutput)
