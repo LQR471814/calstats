@@ -8,10 +8,7 @@ import (
 type EventTrigger struct {
 	Relative time.Duration
 	Absolute time.Time
-}
-
-func (t EventTrigger) IsNull() bool {
-	return t.Relative == 0 && t.Absolute == (time.Time{})
+	NotNone  bool
 }
 
 type Event struct {

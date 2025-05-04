@@ -1,11 +1,11 @@
 package calendar
 
 import (
+	"calutil/internal/tel"
 	"context"
 	"crypto/tls"
 	"fmt"
 	"net/http"
-	"calutil/internal/tel"
 	"time"
 
 	"github.com/emersion/go-ical"
@@ -24,7 +24,14 @@ type CaldavOptions struct {
 	Insecure bool
 }
 
-func NewCaldav(server string, opts CaldavOptions) (Caldav, error) {
+func NewCaldav(server string, opts CaldavOptions) (client Caldav, err error) {
+	defer func() {
+		if err != nil {
+			err = fmt.Errorf("new caldav client: %w", err)
+			return
+		}
+	}()
+
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: opts.Insecure,
@@ -40,12 +47,12 @@ func NewCaldav(server string, opts CaldavOptions) (Caldav, error) {
 		webdavHttp = webdav.HTTPClientWithBasicAuth(httpClient, opts.Username, opts.Password)
 	}
 
-	client, err := caldav.NewClient(webdavHttp, server)
+	inner, err := caldav.NewClient(webdavHttp, server)
 	if err != nil {
-		return Caldav{}, fmt.Errorf("make caldav client: %w", err)
+		return
 	}
 	return Caldav{
-		client: client,
+		client: inner,
 	}, nil
 }
 
@@ -66,177 +73,6 @@ func (c Caldav) Calendars(ctx context.Context) ([]Calendar, error) {
 		}
 	}
 	return out, nil
-}
-
-type caldavTrigger struct {
-	Relative time.Duration
-	Absolute time.Time
-}
-
-type caldavEvent struct {
-	Uid         string
-	Name        string
-	Location    string
-	Description string
-	Categories  []string
-	ExDates     []time.Time
-	Start, End  time.Time
-	Duration    time.Duration
-	RRule       *rrule.RRule
-	RDates      string
-	RId         time.Time
-	Trigger     caldavTrigger
-}
-
-func (c Caldav) parseEvents(objs []caldav.CalendarObject, intvEnd time.Time, tz *time.Location) []caldavEvent {
-	var err error
-	var events []caldavEvent
-
-	for _, eobj := range objs {
-		for _, e := range eobj.Data.Events() {
-			nameProp := e.Props.Get(ical.PropSummary)
-			if nameProp == nil {
-				tel.Log.Warn("caldav", "got event with no name, skipping...", "event", e)
-				continue
-			}
-			name := nameProp.Value
-
-			uidProp := e.Props.Get(ical.PropUID)
-			if uidProp == nil {
-				tel.Log.Warn("caldav", "got event with no UID, skipping...", "event", e)
-				continue
-			}
-			uid := uidProp.Value
-
-			desc := ""
-			descProp := e.Props.Get(ical.PropDescription)
-			if descProp != nil {
-				desc = descProp.Value
-			}
-
-			catProp := e.Props.Get(ical.PropCategories)
-			var categories []string
-			if catProp != nil {
-				categories, err = catProp.TextList()
-				if err != nil {
-					tel.Log.Warn("caldav", "parse event categories", "err", err)
-					continue
-				}
-			}
-
-			start, err := e.DateTimeStart(tz)
-			if err != nil {
-				tel.Log.Warn("caldav", "parse event start", "err", err)
-				continue
-			}
-			end, err := e.DateTimeEnd(tz)
-			if err != nil {
-				tel.Log.Warn("caldav", "parse event end", "err", err)
-				continue
-			}
-			duration := end.Sub(start)
-
-			exProp := e.Props.Get(ical.PropExceptionDates)
-			var exlist []time.Time
-			if exProp != nil {
-				tzId := exProp.Params.Get(ical.PropTimezoneID)
-				var tz *time.Location
-				if tzId != "" {
-					tz, err = time.LoadLocation(tzId)
-					if err != nil {
-						tel.Log.Warn("caldav", "load timezone location", "err", err)
-						continue
-					}
-				}
-
-				datetime, err := exProp.DateTime(tz)
-				if err != nil {
-					tel.Log.Warn("caldav", "parse exception date", "err", err)
-					continue
-				}
-				exlist = append(exlist, datetime)
-			}
-
-			var recurId time.Time
-			recurIdProp := e.Props.Get(ical.PropRecurrenceID)
-			if recurIdProp != nil && recurIdProp.Value != "" {
-				recurId, err = recurIdProp.DateTime(tz)
-				if err != nil {
-					tel.Log.Warn("caldav", "parse recurrence id", "err", err)
-					continue
-				}
-			}
-			var rdates string
-			rdateProp := e.Props.Get(ical.PropRecurrenceDates)
-			if rdateProp != nil {
-				rdates = rdateProp.Value
-			}
-
-			var rule *rrule.RRule
-			rruleProp := e.Props.Get(ical.PropRecurrenceRule)
-			if rruleProp != nil {
-				ropts, err := rrule.StrToROptionInLocation(rruleProp.Value, tz)
-				if err != nil {
-					tel.Log.Warn("caldav", "parse recurrence rule", "err", err)
-					continue
-				}
-				if ropts == nil {
-					tel.Log.Warn("caldav", "parse recurrence rule", "err", fmt.Errorf("ropts is nil"))
-					continue
-				}
-
-				if ropts.Until == (time.Time{}) || ropts.Until.After(intvEnd) {
-					ropts.Until = intvEnd
-				}
-				// set default dtstart to original event's starting time
-				if ropts.Dtstart == (time.Time{}) {
-					ropts.Dtstart = start
-				}
-
-				rule, err = rrule.NewRRule(*ropts)
-				if err != nil {
-					tel.Log.Warn("caldav", "new rrule", "err", err)
-					continue
-				}
-			}
-
-			var trigger caldavTrigger
-			triggerProp := e.Props.Get(ical.PropTrigger)
-			if triggerProp != nil {
-				var relerr error
-				trigger.Relative, relerr = triggerProp.Duration()
-
-				if err != nil {
-					trigger.Absolute, err = triggerProp.DateTime(tz)
-					if err != nil {
-						tel.Log.Warn(
-							"caldav", "parse trigger",
-							"datetime_parse_error", err,
-							"duration_parse_error", relerr,
-						)
-					}
-				}
-			}
-
-			events = append(events, caldavEvent{
-				Uid:        uid,
-				Name:       name,
-				Categories: categories,
-
-				Start:    start,
-				End:      end,
-				Duration: duration,
-
-				ExDates: exlist,
-				RId:     recurId,
-				RRule:   rule,
-				RDates:  rdates,
-				Trigger: trigger,
-			})
-		}
-	}
-
-	return events
 }
 
 // adjustEventBounds crops the event so that it is within the interval bounds [intvStart, intvEnd].
@@ -288,7 +124,17 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 		return nil, err
 	}
 
-	events := c.parseEvents(res, intvEnd, tz)
+	var events []caldavEvent
+	for _, eobj := range res {
+		for _, e := range eobj.Data.Events() {
+			parsed, err := parseEvent(e, intvEnd, tz)
+			if err != nil {
+				tel.Log.Warn("caldav", "skip corrupted event", "err", err)
+				continue
+			}
+			events = append(events, parsed)
+		}
+	}
 
 	intvStart = intvStart.In(tz)
 	intvEnd = intvEnd.In(tz)
@@ -341,20 +187,21 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 			}
 
 			for _, ov := range re.overrides {
-				if recurTime.Equal(ov.RId) {
-					outev, ok := c.adjustEventBounds(Event{
-						Uid:     ov.Uid,
-						Name:    ov.Name,
-						Tags:    ov.Categories,
-						Start:   ov.Start,
-						End:     ov.End,
-						Trigger: EventTrigger(ov.Trigger),
-					}, intvStart, intvEnd)
-					if ok {
-						out = append(out, outev)
-					}
-					continue recur
+				if !recurTime.Equal(ov.RId) {
+					continue
 				}
+				outev, ok := c.adjustEventBounds(Event{
+					Uid:     ov.Uid,
+					Name:    ov.Name,
+					Tags:    ov.Categories,
+					Start:   ov.Start,
+					End:     ov.End,
+					Trigger: EventTrigger(ov.Trigger),
+				}, intvStart, intvEnd)
+				if ok {
+					out = append(out, outev)
+				}
+				continue recur
 			}
 
 			outev, ok := c.adjustEventBounds(Event{
@@ -375,4 +222,218 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 }
 
 func (c Caldav) UpdateEvents(ctx context.Context, calendar Calendar, events []UpdateEvent) error {
+}
+
+type caldavEvent struct {
+	Uid         string
+	Name        string
+	Location    string
+	Description string
+	Categories  []string
+	ExDates     []time.Time
+	Start, End  time.Time
+	Duration    time.Duration
+	RRule       *rrule.RRule
+	RDates      string
+	RId         time.Time
+	Trigger     EventTrigger
+}
+
+func parseEvent(e ical.Event, intvEnd time.Time, tz *time.Location) (event caldavEvent, err error) {
+	defer func() {
+		if err != nil {
+			err = fmt.Errorf("parse event: %w", err)
+		}
+	}()
+
+	(&event).ParseUID(e)
+	(&event).ParseName(e)
+	(&event).ParseLocation(e)
+	(&event).ParseDescription(e)
+
+	err = (&event).ParseStart(e, tz)
+	if err != nil {
+		return
+	}
+	err = (&event).ParseEnd(e, tz)
+	if err != nil {
+		return
+	}
+	event.Duration = event.End.Sub(event.Start)
+
+	err = (&event).ParseCategories(e)
+	if err != nil {
+		return
+	}
+	err = (&event).ParseExceptions(e)
+	if err != nil {
+		return
+	}
+	err = (&event).ParseRecurrence(e, tz, event.Start, intvEnd)
+	if err != nil {
+		return
+	}
+	err = (&event).ParseTrigger(e, tz)
+	if err != nil {
+		return
+	}
+
+	if event.Uid == "" {
+		err = fmt.Errorf("uid is nil")
+		return
+	}
+	if event.Name == "" {
+		err = fmt.Errorf("name is nil")
+		return
+	}
+
+	return
+}
+
+func (ce *caldavEvent) ParseUID(e ical.Event) {
+	uidProp := e.Props.Get(ical.PropUID)
+	if uidProp == nil {
+		return
+	}
+	ce.Uid = uidProp.Value
+}
+
+func (ce *caldavEvent) ParseName(e ical.Event) {
+	nameProp := e.Props.Get(ical.PropSummary)
+	if nameProp == nil {
+		return
+	}
+	ce.Name = nameProp.Value
+}
+
+func (ce *caldavEvent) ParseDescription(e ical.Event) {
+	descProp := e.Props.Get(ical.PropDescription)
+	if descProp == nil {
+		return
+	}
+	ce.Description = descProp.Value
+}
+
+func (ce *caldavEvent) ParseLocation(e ical.Event) {
+	locProp := e.Props.Get(ical.PropLocation)
+	if locProp == nil {
+		return
+	}
+	ce.Location = locProp.Value
+}
+
+func (ce *caldavEvent) ParseCategories(e ical.Event) error {
+	catProp := e.Props.Get(ical.PropCategories)
+	if catProp == nil {
+		return nil
+	}
+	categories, err := catProp.TextList()
+	if err != nil {
+		return err
+	}
+	ce.Categories = categories
+	return nil
+}
+
+func (ce *caldavEvent) ParseStart(e ical.Event, tz *time.Location) error {
+	start, err := e.DateTimeStart(tz)
+	if err != nil {
+		return err
+	}
+	ce.Start = start
+	return nil
+}
+
+func (ce *caldavEvent) ParseEnd(e ical.Event, tz *time.Location) error {
+	end, err := e.DateTimeEnd(tz)
+	if err != nil {
+		return err
+	}
+	ce.End = end
+	return nil
+}
+
+func (ce *caldavEvent) ParseExceptions(e ical.Event) error {
+	exProp := e.Props.Get(ical.PropExceptionDates)
+	if exProp == nil {
+		return nil
+	}
+
+	tzId := exProp.Params.Get(ical.PropTimezoneID)
+	var err error
+	var tz *time.Location
+	if tzId != "" {
+		tz, err = time.LoadLocation(tzId)
+		if err != nil {
+			return err
+		}
+	}
+
+	var datetime time.Time
+	datetime, err = exProp.DateTime(tz)
+	if err != nil {
+		return err
+	}
+
+	ce.ExDates = append(ce.ExDates, datetime)
+	return nil
+}
+
+func (ce *caldavEvent) ParseRecurrence(e ical.Event, tz *time.Location, start, intvEnd time.Time) (err error) {
+	recurIdProp := e.Props.Get(ical.PropRecurrenceID)
+	if recurIdProp != nil && recurIdProp.Value != "" {
+		ce.RId, err = recurIdProp.DateTime(tz)
+		if err != nil {
+			return
+		}
+	}
+
+	rdateProp := e.Props.Get(ical.PropRecurrenceDates)
+	if rdateProp != nil {
+		ce.RDates = rdateProp.Value
+	}
+
+	rruleProp := e.Props.Get(ical.PropRecurrenceRule)
+	if rruleProp != nil {
+		var ropts *rrule.ROption
+		ropts, err = rrule.StrToROptionInLocation(rruleProp.Value, tz)
+		if err != nil {
+			return
+		}
+		if ropts == nil {
+			err = fmt.Errorf("ropts is nil")
+			return
+		}
+
+		if ropts.Until == (time.Time{}) || ropts.Until.After(intvEnd) {
+			ropts.Until = intvEnd
+		}
+		// set default dtstart to original event's starting time
+		if ropts.Dtstart == (time.Time{}) {
+			ropts.Dtstart = start
+		}
+
+		ce.RRule, err = rrule.NewRRule(*ropts)
+		if err != nil {
+			return
+		}
+	}
+
+	return
+}
+
+func (ce *caldavEvent) ParseTrigger(e ical.Event, tz *time.Location) (err error) {
+	triggerProp := e.Props.Get(ical.PropTrigger)
+	if triggerProp == nil {
+		return
+	}
+	ce.Trigger.Relative, err = triggerProp.Duration()
+	if err == nil {
+		return
+	}
+	ce.Trigger.Absolute, err = triggerProp.DateTime(tz)
+	if err != nil {
+		return err
+	}
+	return
 }
