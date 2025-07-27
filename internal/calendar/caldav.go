@@ -4,18 +4,33 @@ import (
 	"calutil/internal/tel"
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/emersion/go-ical"
 	"github.com/emersion/go-webdav"
 	"github.com/emersion/go-webdav/caldav"
 	"github.com/teambition/rrule-go"
+	"github.com/zeebo/xxh3"
+	"golang.org/x/time/rate"
 )
+
+type eventId struct {
+	Uid string
+	RId string
+
+	// ShouldOverride determines whether an override should be created for this
+	// event. It will be true if the given event is a recurrence instance and
+	// it does not already have an override.
+	ShouldOverride bool
+}
 
 type Caldav struct {
 	client *caldav.Client
+	ids    map[uint64]eventId
 }
 
 type CaldavOptions struct {
@@ -154,7 +169,7 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 			track.overrides = append(track.overrides, e)
 		} else { // single event
 			outev, ok := c.adjustEventBounds(Event{
-				Uid:     e.Uid,
+				Id:      intId(e.Uid, formatICalDatetime(e.RId)),
 				Name:    e.Name,
 				Tags:    e.Categories,
 				Start:   e.Start,
@@ -191,7 +206,7 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 					continue
 				}
 				outev, ok := c.adjustEventBounds(Event{
-					Uid:     ov.Uid,
+					Id:      intId(ov.Uid, formatICalDatetime(ov.RId)),
 					Name:    ov.Name,
 					Tags:    ov.Categories,
 					Start:   ov.Start,
@@ -205,7 +220,7 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 			}
 
 			outev, ok := c.adjustEventBounds(Event{
-				Uid:     re.original.Uid,
+				Id:      intId(re.original.Uid, formatICalDatetime(re.original.RId)),
 				Name:    re.original.Name,
 				Tags:    re.original.Categories,
 				Start:   recurTime,
@@ -221,7 +236,88 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 	return out, nil
 }
 
-func (c Caldav) UpdateEvents(ctx context.Context, calendar Calendar, events []UpdateEvent) error {
+func (c Caldav) UpdateEvents(ctx context.Context, calendar Calendar, updates []UpdateEvent) (err error) {
+	urls, err := batchDo(ctx, updates, func(u UpdateEvent) (href string, err error) {
+		res, err := c.client.QueryCalendar(ctx, calendar.Id, &caldav.CalendarQuery{
+			CompFilter: caldav.CompFilter{
+				Name: ical.CompCalendar,
+				Comps: []caldav.CompFilter{{
+					Name: ical.CompEvent,
+					Props: []caldav.PropFilter{{
+						Name: ical.PropUID,
+						TextMatch: &caldav.TextMatch{
+							Text: u.Uid,
+						},
+					}},
+				}},
+			},
+			CompRequest: caldav.CalendarCompRequest{
+				Name: ical.CompCalendar,
+				Comps: []caldav.CalendarCompRequest{{
+					Name: ical.CompEvent,
+					Props: []string{
+						ical.PropURL,
+					},
+				}},
+			},
+		})
+		if err != nil {
+			return
+		}
+		if len(res) != 1 {
+			err = fmt.Errorf("invalid number of returned events (%d)", len(res))
+			return
+		}
+		events := res[0].Data.Events()
+		if len(events) != 1 {
+			err = fmt.Errorf("invalid number of returned events (%d)", len(res))
+			return
+		}
+		href = events[0].Props.Get(ical.PropURL).Value
+		return
+	})
+	if err != nil {
+		return
+	}
+
+	res, err := c.client.MultiGetCalendar(ctx, calendar.Id, &caldav.CalendarMultiGet{
+		Paths: urls,
+	})
+	if err != nil {
+		return
+	}
+
+	for _, eobj := range res {
+	}
+}
+
+func batchDo[I, O any](ctx context.Context, jobs []I, fn func(I) (O, error)) ([]O, error) {
+	limiter := rate.NewLimiter(1, 4)
+	wg := sync.WaitGroup{}
+	lock := sync.Mutex{}
+
+	var errs []error
+	outputs := make([]O, len(jobs))
+	for i, input := range jobs {
+		err := limiter.Wait(ctx)
+		if err != nil {
+			tel.Log.Warn("caldav", "rate limit error", "err", err)
+			continue
+		}
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			output, err := fn(input)
+
+			defer lock.Unlock()
+			lock.Lock()
+			outputs[i] = output
+			errs = append(errs, err)
+		}()
+	}
+
+	return outputs, errors.Join(errs...)
 }
 
 type caldavEvent struct {
@@ -237,6 +333,16 @@ type caldavEvent struct {
 	RDates      string
 	RId         time.Time
 	Trigger     EventTrigger
+}
+
+// intId hashes a calendar event's UID and Recurrence ID into a single uint64.
+func intId(uid string, rid string) uint64 {
+	return xxh3.Hash([]byte(uid + rid))
+}
+
+// formatICalDatetime formats a given [time.Time] in the ical datetime format.
+func formatICalDatetime(t time.Time) string {
+	return t.Format("20060102T150405")
 }
 
 func parseEvent(e ical.Event, intvEnd time.Time, tz *time.Location) (event caldavEvent, err error) {

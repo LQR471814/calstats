@@ -99,7 +99,7 @@ func (s *CalendarService) Events(ctx context.Context, req *connect.Request[v1.Ev
 				id := len(s.eventLookup)
 				s.eventLookup = append(s.eventLookup, eventRef{
 					cal: &cal,
-					uid: event.Uid,
+					uid: event.Id,
 				})
 
 				nameIdx, ok := nameIdxTable[event.Name]
@@ -214,7 +214,7 @@ func DeoverlapEvents(eventList *[]calendar.Event) {
 			events = slices.Insert(events, i+1, event{
 				id: i - 1,
 				Event: calendar.Event{
-					Uid:   a.Uid,
+					Id:   a.Id,
 					Name:  a.Name,
 					Start: b.End,
 					End:   a.End,

@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file v1/api.proto.
  */
 export const file_v1_api: GenFile = /*@__PURE__*/
-  fileDesc("Cgx2MS9hcGkucHJvdG8iXgoISW50ZXJ2YWwSKQoFc3RhcnQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEicKA2VuZBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAimgIKBUV2ZW50EgoKAmlkGAEgASgNEgwKBG5hbWUYAiABKA0SEAoIbG9jYXRpb24YAyABKAkSEwoLZGVzY3JpcHRpb24YBCABKAkSDAoEdGFncxgFIAMoDRIbCghpbnRlcnZhbBgGIAEoCzIJLkludGVydmFsEisKCGR1cmF0aW9uGAcgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEi0KCHJlbGF0aXZlGAggASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uSAASLgoIYWJzb2x1dGUYCSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wSAASDgoEbm9uZRgKIAEoCEgAQgkKB3RyaWdnZXIiEQoPQ2FsZW5kYXJSZXF1ZXN0Im8KEENhbGVuZGFyUmVzcG9uc2USKQoHc291cmNlcxgBIAMoCzIYLkNhbGVuZGFyUmVzcG9uc2UuU291cmNlGjAKBlNvdXJjZRIXCg9jYWxlbmRhcl9zZXJ2ZXIYASABKAkSDQoFbmFtZXMYAiADKAkiPgoNRXZlbnRzUmVxdWVzdBIbCghpbnRlcnZhbBgBIAEoCzIJLkludGVydmFsEhAKCHRpbWV6b25lGAIgASgJIksKDkV2ZW50c1Jlc3BvbnNlEhMKC2V2ZW50X25hbWVzGAEgAygJEgwKBHRhZ3MYAiADKAkSFgoGZXZlbnRzGAMgAygLMgYuRXZlbnQirgQKE1VwZGF0ZUV2ZW50c1JlcXVlc3QSMgoHdXBkYXRlZBgBIAMoCzIhLlVwZGF0ZUV2ZW50c1JlcXVlc3QuVXBkYXRlZEV2ZW50GuIDCgxVcGRhdGVkRXZlbnQSCgoCaWQYASABKA0SEQoEbmFtZRgCIAEoCUgAiAEBEhUKCGxvY2F0aW9uGAMgASgJSAGIAQESGAoLZGVzY3JpcHRpb24YBCABKAlIAogBARI5CgR0YWdzGAUgASgLMiYuVXBkYXRlRXZlbnRzUmVxdWVzdC5VcGRhdGVkRXZlbnQuVGFnc0gDiAEBEiAKCGludGVydmFsGAYgASgLMgkuSW50ZXJ2YWxIBIgBARI/Cgd0cmlnZ2VyGAcgASgLMikuVXBkYXRlRXZlbnRzUmVxdWVzdC5VcGRhdGVkRXZlbnQuVHJpZ2dlckgFiAEBGhYKBFRhZ3MSDgoGdmFsdWVzGAEgAygJGoMBCgdUcmlnZ2VyEi0KCHJlbGF0aXZlGAEgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uSAASLgoIYWJzb2x1dGUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wSAASDgoEbm9uZRgDIAEoCEgAQgkKB3RyaWdnZXJCBwoFX25hbWVCCwoJX2xvY2F0aW9uQg4KDF9kZXNjcmlwdGlvbkIHCgVfdGFnc0ILCglfaW50ZXJ2YWxCCgoIX3RyaWdnZXIiFgoUVXBkYXRlRXZlbnRzUmVzcG9uc2UyqgEKD0NhbGVuZGFyU2VydmljZRIvCghDYWxlbmRhchIQLkNhbGVuZGFyUmVxdWVzdBoRLkNhbGVuZGFyUmVzcG9uc2USKQoGRXZlbnRzEg4uRXZlbnRzUmVxdWVzdBoPLkV2ZW50c1Jlc3BvbnNlEjsKDFVwZGF0ZUV2ZW50cxIULlVwZGF0ZUV2ZW50c1JlcXVlc3QaFS5VcGRhdGVFdmVudHNSZXNwb25zZWIGcHJvdG8z", [file_google_protobuf_timestamp, file_google_protobuf_duration]);
+  fileDesc("Cgx2MS9hcGkucHJvdG8iXgoISW50ZXJ2YWwSKQoFc3RhcnQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEicKA2VuZBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAimgIKBUV2ZW50EgoKAmlkGAEgASgNEgwKBG5hbWUYAiABKA0SEAoIbG9jYXRpb24YAyABKAkSEwoLZGVzY3JpcHRpb24YBCABKAkSDAoEdGFncxgFIAMoDRIbCghpbnRlcnZhbBgGIAEoCzIJLkludGVydmFsEisKCGR1cmF0aW9uGAcgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEi0KCHJlbGF0aXZlGAggASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uSAASLgoIYWJzb2x1dGUYCSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wSAASDgoEbm9uZRgKIAEoCEgAQgkKB3RyaWdnZXIiEQoPQ2FsZW5kYXJSZXF1ZXN0Im8KEENhbGVuZGFyUmVzcG9uc2USKQoHc291cmNlcxgBIAMoCzIYLkNhbGVuZGFyUmVzcG9uc2UuU291cmNlGjAKBlNvdXJjZRIXCg9jYWxlbmRhcl9zZXJ2ZXIYASABKAkSDQoFbmFtZXMYAiADKAkiPgoNRXZlbnRzUmVxdWVzdBIbCghpbnRlcnZhbBgBIAEoCzIJLkludGVydmFsEhAKCHRpbWV6b25lGAIgASgJIksKDkV2ZW50c1Jlc3BvbnNlEhMKC2V2ZW50X25hbWVzGAEgAygJEgwKBHRhZ3MYAiADKAkSFgoGZXZlbnRzGAMgAygLMgYuRXZlbnQiJQoTVXBkYXRlRXZlbnRzUmVxdWVzdBIOCgZzY3JpcHQYASABKAkiFgoUVXBkYXRlRXZlbnRzUmVzcG9uc2UyqgEKD0NhbGVuZGFyU2VydmljZRIvCghDYWxlbmRhchIQLkNhbGVuZGFyUmVxdWVzdBoRLkNhbGVuZGFyUmVzcG9uc2USKQoGRXZlbnRzEg4uRXZlbnRzUmVxdWVzdBoPLkV2ZW50c1Jlc3BvbnNlEjsKDFVwZGF0ZUV2ZW50cxIULlVwZGF0ZUV2ZW50c1JlcXVlc3QaFS5VcGRhdGVFdmVudHNSZXNwb25zZWIGcHJvdG8z", [file_google_protobuf_timestamp, file_google_protobuf_duration]);
 
 /**
  * @generated from message Interval
@@ -222,9 +222,9 @@ export const EventsResponseSchema: GenMessage<EventsResponse> = /*@__PURE__*/
  */
 export type UpdateEventsRequest = Message<"UpdateEventsRequest"> & {
   /**
-   * @generated from field: repeated UpdateEventsRequest.UpdatedEvent updated = 1;
+   * @generated from field: string script = 1;
    */
-  updated: UpdateEventsRequest_UpdatedEvent[];
+  script: string;
 };
 
 /**
@@ -233,105 +233,6 @@ export type UpdateEventsRequest = Message<"UpdateEventsRequest"> & {
  */
 export const UpdateEventsRequestSchema: GenMessage<UpdateEventsRequest> = /*@__PURE__*/
   messageDesc(file_v1_api, 6);
-
-/**
- * @generated from message UpdateEventsRequest.UpdatedEvent
- */
-export type UpdateEventsRequest_UpdatedEvent = Message<"UpdateEventsRequest.UpdatedEvent"> & {
-  /**
-   * @generated from field: uint32 id = 1;
-   */
-  id: number;
-
-  /**
-   * @generated from field: optional string name = 2;
-   */
-  name?: string;
-
-  /**
-   * @generated from field: optional string location = 3;
-   */
-  location?: string;
-
-  /**
-   * @generated from field: optional string description = 4;
-   */
-  description?: string;
-
-  /**
-   * @generated from field: optional UpdateEventsRequest.UpdatedEvent.Tags tags = 5;
-   */
-  tags?: UpdateEventsRequest_UpdatedEvent_Tags;
-
-  /**
-   * @generated from field: optional Interval interval = 6;
-   */
-  interval?: Interval;
-
-  /**
-   * @generated from field: optional UpdateEventsRequest.UpdatedEvent.Trigger trigger = 7;
-   */
-  trigger?: UpdateEventsRequest_UpdatedEvent_Trigger;
-};
-
-/**
- * Describes the message UpdateEventsRequest.UpdatedEvent.
- * Use `create(UpdateEventsRequest_UpdatedEventSchema)` to create a new message.
- */
-export const UpdateEventsRequest_UpdatedEventSchema: GenMessage<UpdateEventsRequest_UpdatedEvent> = /*@__PURE__*/
-  messageDesc(file_v1_api, 6, 0);
-
-/**
- * @generated from message UpdateEventsRequest.UpdatedEvent.Tags
- */
-export type UpdateEventsRequest_UpdatedEvent_Tags = Message<"UpdateEventsRequest.UpdatedEvent.Tags"> & {
-  /**
-   * @generated from field: repeated string values = 1;
-   */
-  values: string[];
-};
-
-/**
- * Describes the message UpdateEventsRequest.UpdatedEvent.Tags.
- * Use `create(UpdateEventsRequest_UpdatedEvent_TagsSchema)` to create a new message.
- */
-export const UpdateEventsRequest_UpdatedEvent_TagsSchema: GenMessage<UpdateEventsRequest_UpdatedEvent_Tags> = /*@__PURE__*/
-  messageDesc(file_v1_api, 6, 0, 0);
-
-/**
- * @generated from message UpdateEventsRequest.UpdatedEvent.Trigger
- */
-export type UpdateEventsRequest_UpdatedEvent_Trigger = Message<"UpdateEventsRequest.UpdatedEvent.Trigger"> & {
-  /**
-   * @generated from oneof UpdateEventsRequest.UpdatedEvent.Trigger.trigger
-   */
-  trigger: {
-    /**
-     * @generated from field: google.protobuf.Duration relative = 1;
-     */
-    value: Duration;
-    case: "relative";
-  } | {
-    /**
-     * @generated from field: google.protobuf.Timestamp absolute = 2;
-     */
-    value: Timestamp;
-    case: "absolute";
-  } | {
-    /**
-     * @generated from field: bool none = 3;
-     */
-    value: boolean;
-    case: "none";
-  } | { case: undefined; value?: undefined };
-};
-
-/**
- * Describes the message UpdateEventsRequest.UpdatedEvent.Trigger.
- * Use `create(UpdateEventsRequest_UpdatedEvent_TriggerSchema)` to create a new message.
- */
-export const UpdateEventsRequest_UpdatedEvent_TriggerSchema: GenMessage<UpdateEventsRequest_UpdatedEvent_Trigger> = /*@__PURE__*/
-  messageDesc(file_v1_api, 6, 0, 1);
 
 /**
  * @generated from message UpdateEventsResponse

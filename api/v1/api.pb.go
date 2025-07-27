@@ -427,8 +427,8 @@ func (x *EventsResponse) GetEvents() []*Event {
 
 // UpdateEvents
 type UpdateEventsRequest struct {
-	state         protoimpl.MessageState              `protogen:"open.v1"`
-	Updated       []*UpdateEventsRequest_UpdatedEvent `protobuf:"bytes,1,rep,name=updated,proto3" json:"updated,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Script        string                 `protobuf:"bytes,1,opt,name=script,proto3" json:"script,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -463,11 +463,11 @@ func (*UpdateEventsRequest) Descriptor() ([]byte, []int) {
 	return file_v1_api_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *UpdateEventsRequest) GetUpdated() []*UpdateEventsRequest_UpdatedEvent {
+func (x *UpdateEventsRequest) GetScript() string {
 	if x != nil {
-		return x.Updated
+		return x.Script
 	}
-	return nil
+	return ""
 }
 
 type UpdateEventsResponse struct {
@@ -558,243 +558,6 @@ func (x *CalendarResponse_Source) GetNames() []string {
 	return nil
 }
 
-type UpdateEventsRequest_UpdatedEvent struct {
-	state         protoimpl.MessageState                    `protogen:"open.v1"`
-	Id            uint32                                    `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          *string                                   `protobuf:"bytes,2,opt,name=name,proto3,oneof" json:"name,omitempty"`
-	Location      *string                                   `protobuf:"bytes,3,opt,name=location,proto3,oneof" json:"location,omitempty"`
-	Description   *string                                   `protobuf:"bytes,4,opt,name=description,proto3,oneof" json:"description,omitempty"`
-	Tags          *UpdateEventsRequest_UpdatedEvent_Tags    `protobuf:"bytes,5,opt,name=tags,proto3,oneof" json:"tags,omitempty"`
-	Interval      *Interval                                 `protobuf:"bytes,6,opt,name=interval,proto3,oneof" json:"interval,omitempty"`
-	Trigger       *UpdateEventsRequest_UpdatedEvent_Trigger `protobuf:"bytes,7,opt,name=trigger,proto3,oneof" json:"trigger,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateEventsRequest_UpdatedEvent) Reset() {
-	*x = UpdateEventsRequest_UpdatedEvent{}
-	mi := &file_v1_api_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateEventsRequest_UpdatedEvent) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateEventsRequest_UpdatedEvent) ProtoMessage() {}
-
-func (x *UpdateEventsRequest_UpdatedEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_api_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateEventsRequest_UpdatedEvent.ProtoReflect.Descriptor instead.
-func (*UpdateEventsRequest_UpdatedEvent) Descriptor() ([]byte, []int) {
-	return file_v1_api_proto_rawDescGZIP(), []int{6, 0}
-}
-
-func (x *UpdateEventsRequest_UpdatedEvent) GetId() uint32 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *UpdateEventsRequest_UpdatedEvent) GetName() string {
-	if x != nil && x.Name != nil {
-		return *x.Name
-	}
-	return ""
-}
-
-func (x *UpdateEventsRequest_UpdatedEvent) GetLocation() string {
-	if x != nil && x.Location != nil {
-		return *x.Location
-	}
-	return ""
-}
-
-func (x *UpdateEventsRequest_UpdatedEvent) GetDescription() string {
-	if x != nil && x.Description != nil {
-		return *x.Description
-	}
-	return ""
-}
-
-func (x *UpdateEventsRequest_UpdatedEvent) GetTags() *UpdateEventsRequest_UpdatedEvent_Tags {
-	if x != nil {
-		return x.Tags
-	}
-	return nil
-}
-
-func (x *UpdateEventsRequest_UpdatedEvent) GetInterval() *Interval {
-	if x != nil {
-		return x.Interval
-	}
-	return nil
-}
-
-func (x *UpdateEventsRequest_UpdatedEvent) GetTrigger() *UpdateEventsRequest_UpdatedEvent_Trigger {
-	if x != nil {
-		return x.Trigger
-	}
-	return nil
-}
-
-type UpdateEventsRequest_UpdatedEvent_Tags struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Values        []string               `protobuf:"bytes,1,rep,name=values,proto3" json:"values,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateEventsRequest_UpdatedEvent_Tags) Reset() {
-	*x = UpdateEventsRequest_UpdatedEvent_Tags{}
-	mi := &file_v1_api_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateEventsRequest_UpdatedEvent_Tags) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateEventsRequest_UpdatedEvent_Tags) ProtoMessage() {}
-
-func (x *UpdateEventsRequest_UpdatedEvent_Tags) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_api_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateEventsRequest_UpdatedEvent_Tags.ProtoReflect.Descriptor instead.
-func (*UpdateEventsRequest_UpdatedEvent_Tags) Descriptor() ([]byte, []int) {
-	return file_v1_api_proto_rawDescGZIP(), []int{6, 0, 0}
-}
-
-func (x *UpdateEventsRequest_UpdatedEvent_Tags) GetValues() []string {
-	if x != nil {
-		return x.Values
-	}
-	return nil
-}
-
-type UpdateEventsRequest_UpdatedEvent_Trigger struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Types that are valid to be assigned to Trigger:
-	//
-	//	*UpdateEventsRequest_UpdatedEvent_Trigger_Relative
-	//	*UpdateEventsRequest_UpdatedEvent_Trigger_Absolute
-	//	*UpdateEventsRequest_UpdatedEvent_Trigger_None
-	Trigger       isUpdateEventsRequest_UpdatedEvent_Trigger_Trigger `protobuf_oneof:"trigger"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateEventsRequest_UpdatedEvent_Trigger) Reset() {
-	*x = UpdateEventsRequest_UpdatedEvent_Trigger{}
-	mi := &file_v1_api_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateEventsRequest_UpdatedEvent_Trigger) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateEventsRequest_UpdatedEvent_Trigger) ProtoMessage() {}
-
-func (x *UpdateEventsRequest_UpdatedEvent_Trigger) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_api_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateEventsRequest_UpdatedEvent_Trigger.ProtoReflect.Descriptor instead.
-func (*UpdateEventsRequest_UpdatedEvent_Trigger) Descriptor() ([]byte, []int) {
-	return file_v1_api_proto_rawDescGZIP(), []int{6, 0, 1}
-}
-
-func (x *UpdateEventsRequest_UpdatedEvent_Trigger) GetTrigger() isUpdateEventsRequest_UpdatedEvent_Trigger_Trigger {
-	if x != nil {
-		return x.Trigger
-	}
-	return nil
-}
-
-func (x *UpdateEventsRequest_UpdatedEvent_Trigger) GetRelative() *durationpb.Duration {
-	if x != nil {
-		if x, ok := x.Trigger.(*UpdateEventsRequest_UpdatedEvent_Trigger_Relative); ok {
-			return x.Relative
-		}
-	}
-	return nil
-}
-
-func (x *UpdateEventsRequest_UpdatedEvent_Trigger) GetAbsolute() *timestamppb.Timestamp {
-	if x != nil {
-		if x, ok := x.Trigger.(*UpdateEventsRequest_UpdatedEvent_Trigger_Absolute); ok {
-			return x.Absolute
-		}
-	}
-	return nil
-}
-
-func (x *UpdateEventsRequest_UpdatedEvent_Trigger) GetNone() bool {
-	if x != nil {
-		if x, ok := x.Trigger.(*UpdateEventsRequest_UpdatedEvent_Trigger_None); ok {
-			return x.None
-		}
-	}
-	return false
-}
-
-type isUpdateEventsRequest_UpdatedEvent_Trigger_Trigger interface {
-	isUpdateEventsRequest_UpdatedEvent_Trigger_Trigger()
-}
-
-type UpdateEventsRequest_UpdatedEvent_Trigger_Relative struct {
-	Relative *durationpb.Duration `protobuf:"bytes,1,opt,name=relative,proto3,oneof"`
-}
-
-type UpdateEventsRequest_UpdatedEvent_Trigger_Absolute struct {
-	Absolute *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=absolute,proto3,oneof"`
-}
-
-type UpdateEventsRequest_UpdatedEvent_Trigger_None struct {
-	None bool `protobuf:"varint,3,opt,name=none,proto3,oneof"`
-}
-
-func (*UpdateEventsRequest_UpdatedEvent_Trigger_Relative) isUpdateEventsRequest_UpdatedEvent_Trigger_Trigger() {
-}
-
-func (*UpdateEventsRequest_UpdatedEvent_Trigger_Absolute) isUpdateEventsRequest_UpdatedEvent_Trigger_Trigger() {
-}
-
-func (*UpdateEventsRequest_UpdatedEvent_Trigger_None) isUpdateEventsRequest_UpdatedEvent_Trigger_Trigger() {
-}
-
 var File_v1_api_proto protoreflect.FileDescriptor
 
 const file_v1_api_proto_rawDesc = "" +
@@ -829,31 +592,9 @@ const file_v1_api_proto_rawDesc = "" +
 	"\vevent_names\x18\x01 \x03(\tR\n" +
 	"eventNames\x12\x12\n" +
 	"\x04tags\x18\x02 \x03(\tR\x04tags\x12\x1e\n" +
-	"\x06events\x18\x03 \x03(\v2\x06.EventR\x06events\"\x93\x05\n" +
-	"\x13UpdateEventsRequest\x12;\n" +
-	"\aupdated\x18\x01 \x03(\v2!.UpdateEventsRequest.UpdatedEventR\aupdated\x1a\xbe\x04\n" +
-	"\fUpdatedEvent\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\rR\x02id\x12\x17\n" +
-	"\x04name\x18\x02 \x01(\tH\x00R\x04name\x88\x01\x01\x12\x1f\n" +
-	"\blocation\x18\x03 \x01(\tH\x01R\blocation\x88\x01\x01\x12%\n" +
-	"\vdescription\x18\x04 \x01(\tH\x02R\vdescription\x88\x01\x01\x12?\n" +
-	"\x04tags\x18\x05 \x01(\v2&.UpdateEventsRequest.UpdatedEvent.TagsH\x03R\x04tags\x88\x01\x01\x12*\n" +
-	"\binterval\x18\x06 \x01(\v2\t.IntervalH\x04R\binterval\x88\x01\x01\x12H\n" +
-	"\atrigger\x18\a \x01(\v2).UpdateEventsRequest.UpdatedEvent.TriggerH\x05R\atrigger\x88\x01\x01\x1a\x1e\n" +
-	"\x04Tags\x12\x16\n" +
-	"\x06values\x18\x01 \x03(\tR\x06values\x1a\x9d\x01\n" +
-	"\aTrigger\x127\n" +
-	"\brelative\x18\x01 \x01(\v2\x19.google.protobuf.DurationH\x00R\brelative\x128\n" +
-	"\babsolute\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\babsolute\x12\x14\n" +
-	"\x04none\x18\x03 \x01(\bH\x00R\x04noneB\t\n" +
-	"\atriggerB\a\n" +
-	"\x05_nameB\v\n" +
-	"\t_locationB\x0e\n" +
-	"\f_descriptionB\a\n" +
-	"\x05_tagsB\v\n" +
-	"\t_intervalB\n" +
-	"\n" +
-	"\b_trigger\"\x16\n" +
+	"\x06events\x18\x03 \x03(\v2\x06.EventR\x06events\"-\n" +
+	"\x13UpdateEventsRequest\x12\x16\n" +
+	"\x06script\x18\x01 \x01(\tR\x06script\"\x16\n" +
 	"\x14UpdateEventsResponse2\xaa\x01\n" +
 	"\x0fCalendarService\x12/\n" +
 	"\bCalendar\x12\x10.CalendarRequest\x1a\x11.CalendarResponse\x12)\n" +
@@ -872,50 +613,41 @@ func file_v1_api_proto_rawDescGZIP() []byte {
 	return file_v1_api_proto_rawDescData
 }
 
-var file_v1_api_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_v1_api_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_v1_api_proto_goTypes = []any{
-	(*Interval)(nil),                                 // 0: Interval
-	(*Event)(nil),                                    // 1: Event
-	(*CalendarRequest)(nil),                          // 2: CalendarRequest
-	(*CalendarResponse)(nil),                         // 3: CalendarResponse
-	(*EventsRequest)(nil),                            // 4: EventsRequest
-	(*EventsResponse)(nil),                           // 5: EventsResponse
-	(*UpdateEventsRequest)(nil),                      // 6: UpdateEventsRequest
-	(*UpdateEventsResponse)(nil),                     // 7: UpdateEventsResponse
-	(*CalendarResponse_Source)(nil),                  // 8: CalendarResponse.Source
-	(*UpdateEventsRequest_UpdatedEvent)(nil),         // 9: UpdateEventsRequest.UpdatedEvent
-	(*UpdateEventsRequest_UpdatedEvent_Tags)(nil),    // 10: UpdateEventsRequest.UpdatedEvent.Tags
-	(*UpdateEventsRequest_UpdatedEvent_Trigger)(nil), // 11: UpdateEventsRequest.UpdatedEvent.Trigger
-	(*timestamppb.Timestamp)(nil),                    // 12: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),                      // 13: google.protobuf.Duration
+	(*Interval)(nil),                // 0: Interval
+	(*Event)(nil),                   // 1: Event
+	(*CalendarRequest)(nil),         // 2: CalendarRequest
+	(*CalendarResponse)(nil),        // 3: CalendarResponse
+	(*EventsRequest)(nil),           // 4: EventsRequest
+	(*EventsResponse)(nil),          // 5: EventsResponse
+	(*UpdateEventsRequest)(nil),     // 6: UpdateEventsRequest
+	(*UpdateEventsResponse)(nil),    // 7: UpdateEventsResponse
+	(*CalendarResponse_Source)(nil), // 8: CalendarResponse.Source
+	(*timestamppb.Timestamp)(nil),   // 9: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),     // 10: google.protobuf.Duration
 }
 var file_v1_api_proto_depIdxs = []int32{
-	12, // 0: Interval.start:type_name -> google.protobuf.Timestamp
-	12, // 1: Interval.end:type_name -> google.protobuf.Timestamp
+	9,  // 0: Interval.start:type_name -> google.protobuf.Timestamp
+	9,  // 1: Interval.end:type_name -> google.protobuf.Timestamp
 	0,  // 2: Event.interval:type_name -> Interval
-	13, // 3: Event.duration:type_name -> google.protobuf.Duration
-	13, // 4: Event.relative:type_name -> google.protobuf.Duration
-	12, // 5: Event.absolute:type_name -> google.protobuf.Timestamp
+	10, // 3: Event.duration:type_name -> google.protobuf.Duration
+	10, // 4: Event.relative:type_name -> google.protobuf.Duration
+	9,  // 5: Event.absolute:type_name -> google.protobuf.Timestamp
 	8,  // 6: CalendarResponse.sources:type_name -> CalendarResponse.Source
 	0,  // 7: EventsRequest.interval:type_name -> Interval
 	1,  // 8: EventsResponse.events:type_name -> Event
-	9,  // 9: UpdateEventsRequest.updated:type_name -> UpdateEventsRequest.UpdatedEvent
-	10, // 10: UpdateEventsRequest.UpdatedEvent.tags:type_name -> UpdateEventsRequest.UpdatedEvent.Tags
-	0,  // 11: UpdateEventsRequest.UpdatedEvent.interval:type_name -> Interval
-	11, // 12: UpdateEventsRequest.UpdatedEvent.trigger:type_name -> UpdateEventsRequest.UpdatedEvent.Trigger
-	13, // 13: UpdateEventsRequest.UpdatedEvent.Trigger.relative:type_name -> google.protobuf.Duration
-	12, // 14: UpdateEventsRequest.UpdatedEvent.Trigger.absolute:type_name -> google.protobuf.Timestamp
-	2,  // 15: CalendarService.Calendar:input_type -> CalendarRequest
-	4,  // 16: CalendarService.Events:input_type -> EventsRequest
-	6,  // 17: CalendarService.UpdateEvents:input_type -> UpdateEventsRequest
-	3,  // 18: CalendarService.Calendar:output_type -> CalendarResponse
-	5,  // 19: CalendarService.Events:output_type -> EventsResponse
-	7,  // 20: CalendarService.UpdateEvents:output_type -> UpdateEventsResponse
-	18, // [18:21] is the sub-list for method output_type
-	15, // [15:18] is the sub-list for method input_type
-	15, // [15:15] is the sub-list for extension type_name
-	15, // [15:15] is the sub-list for extension extendee
-	0,  // [0:15] is the sub-list for field type_name
+	2,  // 9: CalendarService.Calendar:input_type -> CalendarRequest
+	4,  // 10: CalendarService.Events:input_type -> EventsRequest
+	6,  // 11: CalendarService.UpdateEvents:input_type -> UpdateEventsRequest
+	3,  // 12: CalendarService.Calendar:output_type -> CalendarResponse
+	5,  // 13: CalendarService.Events:output_type -> EventsResponse
+	7,  // 14: CalendarService.UpdateEvents:output_type -> UpdateEventsResponse
+	12, // [12:15] is the sub-list for method output_type
+	9,  // [9:12] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_v1_api_proto_init() }
@@ -928,19 +660,13 @@ func file_v1_api_proto_init() {
 		(*Event_Absolute)(nil),
 		(*Event_None)(nil),
 	}
-	file_v1_api_proto_msgTypes[9].OneofWrappers = []any{}
-	file_v1_api_proto_msgTypes[11].OneofWrappers = []any{
-		(*UpdateEventsRequest_UpdatedEvent_Trigger_Relative)(nil),
-		(*UpdateEventsRequest_UpdatedEvent_Trigger_Absolute)(nil),
-		(*UpdateEventsRequest_UpdatedEvent_Trigger_None)(nil),
-	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_api_proto_rawDesc), len(file_v1_api_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

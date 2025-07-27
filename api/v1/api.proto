@@ -48,26 +48,7 @@ message EventsResponse {
 
 // UpdateEvents
 message UpdateEventsRequest {
-  message UpdatedEvent {
-    uint32 id = 1;
-    optional string name = 2;
-    optional string location = 3;
-    optional string description = 4;
-    message Tags {
-      repeated string values = 1;
-    }
-    optional Tags tags = 5;
-    optional Interval interval = 6;
-    message Trigger {
-      oneof trigger {
-        google.protobuf.Duration relative = 1;
-        google.protobuf.Timestamp absolute = 2;
-        bool none = 3;
-      }
-    }
-    optional Trigger trigger = 7;
-  }
-  repeated UpdatedEvent updated = 1;
+  string script = 1;
 }
 message UpdateEventsResponse {}
 

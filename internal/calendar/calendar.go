@@ -12,7 +12,7 @@ type EventTrigger struct {
 }
 
 type Event struct {
-	Uid         string
+	Id          uint64
 	Name        string
 	Location    string
 	Description string
@@ -31,10 +31,13 @@ type Calendar struct {
 }
 
 type UpdateEvent struct {
-	Uid      string
-	Name     string
-	Location string
-	Tags     []string
+	Id          uint64
+	Name        *string
+	Location    *string
+	Description *string
+	Tags        *[]string
+	Start, End  *time.Time
+	Trigger     *EventTrigger
 }
 
 type Source interface {
