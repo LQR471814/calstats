@@ -5,7 +5,7 @@
 package v1connect
 
 import (
-	v1 "calutil/api/v1"
+	v1 "calstats/api/v1"
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"

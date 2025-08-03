@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 	"os"
-	"calutil/internal/tel"
+	"calstats/internal/tel"
 
 	connectcors "connectrpc.com/cors"
 	"github.com/hujun-open/myflags/v2"
@@ -18,7 +18,7 @@ func main() {
 		},
 	}
 
-	filler := myflags.NewFiller("calutil", "view schedule statistics with ease")
+	filler := myflags.NewFiller("calstats", "view schedule statistics with ease")
 	err := filler.Fill(&cli)
 	if err != nil {
 		fatalerr("parse cli args", "err", err)

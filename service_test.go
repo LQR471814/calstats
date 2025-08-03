@@ -1,7 +1,7 @@
 package main
 
 import (
-	"calutil/internal/calendar"
+	"calstats/internal/calendar"
 	"testing"
 	"time"
 )

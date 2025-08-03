@@ -1,9 +1,9 @@
 package main
 
 import (
-	"calutil/api/v1/v1connect"
-	"calutil/internal/calendar"
-	"calutil/internal/tel"
+	"calstats/api/v1/v1connect"
+	"calstats/internal/calendar"
+	"calstats/internal/tel"
 	"context"
 	"embed"
 	"fmt"

@@ -1,4 +1,4 @@
-module calutil
+module calstats
 
 go 1.23.4
 

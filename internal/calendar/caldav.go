@@ -1,7 +1,7 @@
 package calendar
 
 import (
-	"calutil/internal/tel"
+	"calstats/internal/tel"
 	"context"
 	"crypto/tls"
 	"errors"

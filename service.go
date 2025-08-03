@@ -1,8 +1,8 @@
 package main
 
 import (
-	v1 "calutil/api/v1"
-	"calutil/internal/calendar"
+	v1 "calstats/api/v1"
+	"calstats/internal/calendar"
 	"context"
 	"encoding/json"
 	"fmt"

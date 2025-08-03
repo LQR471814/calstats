@@ -599,7 +599,7 @@ const file_v1_api_proto_rawDesc = "" +
 	"\x0fCalendarService\x12/\n" +
 	"\bCalendar\x12\x10.CalendarRequest\x1a\x11.CalendarResponse\x12)\n" +
 	"\x06Events\x12\x0e.EventsRequest\x1a\x0f.EventsResponse\x12;\n" +
-	"\fUpdateEvents\x12\x14.UpdateEventsRequest\x1a\x15.UpdateEventsResponseB\x1cB\bApiProtoP\x01Z\x0ecalutil/api/v1b\x06proto3"
+	"\fUpdateEvents\x12\x14.UpdateEventsRequest\x1a\x15.UpdateEventsResponseB\x1cB\bApiProtoP\x01Z\x0ecalstats/api/v1b\x06proto3"
 
 var (
 	file_v1_api_proto_rawDescOnce sync.Once
