@@ -1,14 +1,8 @@
-# calutil
+# calstats
 
-> The missing tools for managing calendars at scale.
+> Visualize how your time is spent.
 
 ![demo.png](./docs/demo.png)
-
-## Features
-
-- **Statistics:** Visualize how your time is spent.
-- **Bulk edit:** Edit calendar events in bulk.
-- **Version history:** View changes to your calendar over time.
 
 ## Configuration
 
@@ -31,7 +25,7 @@
 ## Usage
 
 ```sh
-./calutil --config <path/to/config.json5> serve
+./calstats --config <path/to/config.json5> serve
 ```
 
 ## Build
