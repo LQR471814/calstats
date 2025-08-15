@@ -1,9 +1,9 @@
 package main
 
 import (
+	"calutils/internal/tel"
 	"net/http"
 	"os"
-	"calutils/internal/tel"
 
 	connectcors "connectrpc.com/cors"
 	"github.com/hujun-open/myflags/v2"
@@ -43,3 +43,4 @@ func withCORS(connectHandler http.Handler) http.Handler {
 	})
 	return c.Handler(connectHandler)
 }
+

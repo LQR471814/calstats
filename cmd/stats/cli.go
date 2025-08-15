@@ -168,3 +168,4 @@ func (c Cli) getCalendar(cfg ServerConfig) calendar.Source {
 	}
 	return source
 }
+
