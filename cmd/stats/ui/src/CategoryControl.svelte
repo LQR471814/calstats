@@ -33,7 +33,7 @@
 				/>
 				<Label
 					id={`pie-label-${i}`}
-					class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+					class="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 				>
 					{cat}
 				</Label>

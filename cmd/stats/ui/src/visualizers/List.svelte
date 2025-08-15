@@ -41,7 +41,7 @@
 
 			<button
 				class={cn(
-					"flex gap-3 group relative text-left",
+					"flex gap-3 group relative text-left cursor-pointer",
 					isNotExpandable ? "cursor-not-allowed" : "",
 				)}
 				disabled={isNotExpandable}

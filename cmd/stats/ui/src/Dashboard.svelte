@@ -40,21 +40,21 @@
 	<div class="flex flex-col gap-6 flex-1 py-6">
 		<h1>Schedule statistics</h1>
 
-		<div class="grid grid-cols-[min-content_1fr] gap-3 max-w-[400px]">
-			<span>Server</span>
-			<code class="w-fit">
-				{$metaQuery.data?.calendarServer ?? "loading..."}
-			</code>
-			<span>Calendars</span>
+		<div class="grid grid-cols-[min-content_1fr] gap-3">
 			{#if $metaQuery.data}
-				<div>
-					{#each $metaQuery.data.names as name, i}
+				{#each $metaQuery.data.sources as source}
+					<p>Server</p>
+					<code class="w-fit">
+						{source.calendarServer}
+					</code>
+					<p>Calendars</p>
+					{#each source.names as name, i}
 						{#if i > 0}
 							<span class="mr-1">,</span>
 						{/if}
 						<code>{name}</code>
 					{/each}
-				</div>
+				{/each}
 			{:else}
 				<code>loading...</code>
 			{/if}

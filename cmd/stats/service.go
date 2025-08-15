@@ -23,7 +23,7 @@ type CalendarService struct {
 
 type eventRef struct {
 	cal *calendar.Calendar
-	uid string
+	uid uint64
 }
 
 type source struct {
@@ -162,10 +162,6 @@ func (s *CalendarService) Events(ctx context.Context, req *connect.Request[v1.Ev
 	}), nil
 }
 
-func (s *CalendarService) UpdateEvents(ctx context.Context, req *connect.Request[v1.UpdateEventsRequest]) (*connect.Response[v1.UpdateEventsResponse], error) {
-
-}
-
 func (s *CalendarService) Calendar(ctx context.Context, req *connect.Request[v1.CalendarRequest]) (*connect.Response[v1.CalendarResponse], error) {
 	sources := make([]*v1.CalendarResponse_Source, len(s.sources))
 	for i, s := range s.sources {
@@ -214,7 +210,7 @@ func DeoverlapEvents(eventList *[]calendar.Event) {
 			events = slices.Insert(events, i+1, event{
 				id: i - 1,
 				Event: calendar.Event{
-					Id:   a.Id,
+					Id:    a.Id,
 					Name:  a.Name,
 					Start: b.End,
 					End:   a.End,
@@ -285,3 +281,4 @@ func prettyPrint(value any) string {
 	}
 	return string(expected)
 }
+
