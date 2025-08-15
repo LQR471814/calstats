@@ -13,8 +13,3 @@ export const calendar = CalendarService.method.calendar;
  * @generated from rpc CalendarService.Events
  */
 export const events = CalendarService.method.events;
-
-/**
- * @generated from rpc CalendarService.UpdateEvents
- */
-export const updateEvents = CalendarService.method.updateEvents;

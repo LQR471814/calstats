@@ -425,87 +425,6 @@ func (x *EventsResponse) GetEvents() []*Event {
 	return nil
 }
 
-// UpdateEvents
-type UpdateEventsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Script        string                 `protobuf:"bytes,1,opt,name=script,proto3" json:"script,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateEventsRequest) Reset() {
-	*x = UpdateEventsRequest{}
-	mi := &file_v1_api_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateEventsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateEventsRequest) ProtoMessage() {}
-
-func (x *UpdateEventsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_api_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateEventsRequest.ProtoReflect.Descriptor instead.
-func (*UpdateEventsRequest) Descriptor() ([]byte, []int) {
-	return file_v1_api_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *UpdateEventsRequest) GetScript() string {
-	if x != nil {
-		return x.Script
-	}
-	return ""
-}
-
-type UpdateEventsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateEventsResponse) Reset() {
-	*x = UpdateEventsResponse{}
-	mi := &file_v1_api_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateEventsResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateEventsResponse) ProtoMessage() {}
-
-func (x *UpdateEventsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_api_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateEventsResponse.ProtoReflect.Descriptor instead.
-func (*UpdateEventsResponse) Descriptor() ([]byte, []int) {
-	return file_v1_api_proto_rawDescGZIP(), []int{7}
-}
-
 type CalendarResponse_Source struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	CalendarServer string                 `protobuf:"bytes,1,opt,name=calendar_server,json=calendarServer,proto3" json:"calendar_server,omitempty"`
@@ -516,7 +435,7 @@ type CalendarResponse_Source struct {
 
 func (x *CalendarResponse_Source) Reset() {
 	*x = CalendarResponse_Source{}
-	mi := &file_v1_api_proto_msgTypes[8]
+	mi := &file_v1_api_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -528,7 +447,7 @@ func (x *CalendarResponse_Source) String() string {
 func (*CalendarResponse_Source) ProtoMessage() {}
 
 func (x *CalendarResponse_Source) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_api_proto_msgTypes[8]
+	mi := &file_v1_api_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -592,14 +511,10 @@ const file_v1_api_proto_rawDesc = "" +
 	"\vevent_names\x18\x01 \x03(\tR\n" +
 	"eventNames\x12\x12\n" +
 	"\x04tags\x18\x02 \x03(\tR\x04tags\x12\x1e\n" +
-	"\x06events\x18\x03 \x03(\v2\x06.EventR\x06events\"-\n" +
-	"\x13UpdateEventsRequest\x12\x16\n" +
-	"\x06script\x18\x01 \x01(\tR\x06script\"\x16\n" +
-	"\x14UpdateEventsResponse2\xaa\x01\n" +
+	"\x06events\x18\x03 \x03(\v2\x06.EventR\x06events2m\n" +
 	"\x0fCalendarService\x12/\n" +
 	"\bCalendar\x12\x10.CalendarRequest\x1a\x11.CalendarResponse\x12)\n" +
-	"\x06Events\x12\x0e.EventsRequest\x1a\x0f.EventsResponse\x12;\n" +
-	"\fUpdateEvents\x12\x14.UpdateEventsRequest\x1a\x15.UpdateEventsResponseB\x1cB\bApiProtoP\x01Z\x0ecalstats/api/v1b\x06proto3"
+	"\x06Events\x12\x0e.EventsRequest\x1a\x0f.EventsResponseB\x1dB\bApiProtoP\x01Z\x0fcalutils/api/v1b\x06proto3"
 
 var (
 	file_v1_api_proto_rawDescOnce sync.Once
@@ -613,7 +528,7 @@ func file_v1_api_proto_rawDescGZIP() []byte {
 	return file_v1_api_proto_rawDescData
 }
 
-var file_v1_api_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_v1_api_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_v1_api_proto_goTypes = []any{
 	(*Interval)(nil),                // 0: Interval
 	(*Event)(nil),                   // 1: Event
@@ -621,30 +536,26 @@ var file_v1_api_proto_goTypes = []any{
 	(*CalendarResponse)(nil),        // 3: CalendarResponse
 	(*EventsRequest)(nil),           // 4: EventsRequest
 	(*EventsResponse)(nil),          // 5: EventsResponse
-	(*UpdateEventsRequest)(nil),     // 6: UpdateEventsRequest
-	(*UpdateEventsResponse)(nil),    // 7: UpdateEventsResponse
-	(*CalendarResponse_Source)(nil), // 8: CalendarResponse.Source
-	(*timestamppb.Timestamp)(nil),   // 9: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),     // 10: google.protobuf.Duration
+	(*CalendarResponse_Source)(nil), // 6: CalendarResponse.Source
+	(*timestamppb.Timestamp)(nil),   // 7: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),     // 8: google.protobuf.Duration
 }
 var file_v1_api_proto_depIdxs = []int32{
-	9,  // 0: Interval.start:type_name -> google.protobuf.Timestamp
-	9,  // 1: Interval.end:type_name -> google.protobuf.Timestamp
+	7,  // 0: Interval.start:type_name -> google.protobuf.Timestamp
+	7,  // 1: Interval.end:type_name -> google.protobuf.Timestamp
 	0,  // 2: Event.interval:type_name -> Interval
-	10, // 3: Event.duration:type_name -> google.protobuf.Duration
-	10, // 4: Event.relative:type_name -> google.protobuf.Duration
-	9,  // 5: Event.absolute:type_name -> google.protobuf.Timestamp
-	8,  // 6: CalendarResponse.sources:type_name -> CalendarResponse.Source
+	8,  // 3: Event.duration:type_name -> google.protobuf.Duration
+	8,  // 4: Event.relative:type_name -> google.protobuf.Duration
+	7,  // 5: Event.absolute:type_name -> google.protobuf.Timestamp
+	6,  // 6: CalendarResponse.sources:type_name -> CalendarResponse.Source
 	0,  // 7: EventsRequest.interval:type_name -> Interval
 	1,  // 8: EventsResponse.events:type_name -> Event
 	2,  // 9: CalendarService.Calendar:input_type -> CalendarRequest
 	4,  // 10: CalendarService.Events:input_type -> EventsRequest
-	6,  // 11: CalendarService.UpdateEvents:input_type -> UpdateEventsRequest
-	3,  // 12: CalendarService.Calendar:output_type -> CalendarResponse
-	5,  // 13: CalendarService.Events:output_type -> EventsResponse
-	7,  // 14: CalendarService.UpdateEvents:output_type -> UpdateEventsResponse
-	12, // [12:15] is the sub-list for method output_type
-	9,  // [9:12] is the sub-list for method input_type
+	3,  // 11: CalendarService.Calendar:output_type -> CalendarResponse
+	5,  // 12: CalendarService.Events:output_type -> EventsResponse
+	11, // [11:13] is the sub-list for method output_type
+	9,  // [9:11] is the sub-list for method input_type
 	9,  // [9:9] is the sub-list for extension type_name
 	9,  // [9:9] is the sub-list for extension extendee
 	0,  // [0:9] is the sub-list for field type_name
@@ -666,7 +577,7 @@ func file_v1_api_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_api_proto_rawDesc), len(file_v1_api_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

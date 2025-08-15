@@ -30,18 +30,7 @@ type Calendar struct {
 	Name string
 }
 
-type UpdateEvent struct {
-	Id          uint64
-	Name        *string
-	Location    *string
-	Description *string
-	Tags        *[]string
-	Start, End  *time.Time
-	Trigger     *EventTrigger
-}
-
 type Source interface {
 	Calendars(ctx context.Context) ([]Calendar, error)
 	Events(ctx context.Context, calendar Calendar, start, end time.Time, tz *time.Location) ([]Event, error)
-	UpdateEvents(ctx context.Context, calendar Calendar, updates []UpdateEvent) error
 }

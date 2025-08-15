@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file v1/api.proto.
  */
 export const file_v1_api: GenFile = /*@__PURE__*/
-  fileDesc("Cgx2MS9hcGkucHJvdG8iXgoISW50ZXJ2YWwSKQoFc3RhcnQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEicKA2VuZBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAimgIKBUV2ZW50EgoKAmlkGAEgASgNEgwKBG5hbWUYAiABKA0SEAoIbG9jYXRpb24YAyABKAkSEwoLZGVzY3JpcHRpb24YBCABKAkSDAoEdGFncxgFIAMoDRIbCghpbnRlcnZhbBgGIAEoCzIJLkludGVydmFsEisKCGR1cmF0aW9uGAcgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEi0KCHJlbGF0aXZlGAggASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uSAASLgoIYWJzb2x1dGUYCSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wSAASDgoEbm9uZRgKIAEoCEgAQgkKB3RyaWdnZXIiEQoPQ2FsZW5kYXJSZXF1ZXN0Im8KEENhbGVuZGFyUmVzcG9uc2USKQoHc291cmNlcxgBIAMoCzIYLkNhbGVuZGFyUmVzcG9uc2UuU291cmNlGjAKBlNvdXJjZRIXCg9jYWxlbmRhcl9zZXJ2ZXIYASABKAkSDQoFbmFtZXMYAiADKAkiPgoNRXZlbnRzUmVxdWVzdBIbCghpbnRlcnZhbBgBIAEoCzIJLkludGVydmFsEhAKCHRpbWV6b25lGAIgASgJIksKDkV2ZW50c1Jlc3BvbnNlEhMKC2V2ZW50X25hbWVzGAEgAygJEgwKBHRhZ3MYAiADKAkSFgoGZXZlbnRzGAMgAygLMgYuRXZlbnQiJQoTVXBkYXRlRXZlbnRzUmVxdWVzdBIOCgZzY3JpcHQYASABKAkiFgoUVXBkYXRlRXZlbnRzUmVzcG9uc2UyqgEKD0NhbGVuZGFyU2VydmljZRIvCghDYWxlbmRhchIQLkNhbGVuZGFyUmVxdWVzdBoRLkNhbGVuZGFyUmVzcG9uc2USKQoGRXZlbnRzEg4uRXZlbnRzUmVxdWVzdBoPLkV2ZW50c1Jlc3BvbnNlEjsKDFVwZGF0ZUV2ZW50cxIULlVwZGF0ZUV2ZW50c1JlcXVlc3QaFS5VcGRhdGVFdmVudHNSZXNwb25zZWIGcHJvdG8z", [file_google_protobuf_timestamp, file_google_protobuf_duration]);
+  fileDesc("Cgx2MS9hcGkucHJvdG8iXgoISW50ZXJ2YWwSKQoFc3RhcnQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEicKA2VuZBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAimgIKBUV2ZW50EgoKAmlkGAEgASgNEgwKBG5hbWUYAiABKA0SEAoIbG9jYXRpb24YAyABKAkSEwoLZGVzY3JpcHRpb24YBCABKAkSDAoEdGFncxgFIAMoDRIbCghpbnRlcnZhbBgGIAEoCzIJLkludGVydmFsEisKCGR1cmF0aW9uGAcgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEi0KCHJlbGF0aXZlGAggASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uSAASLgoIYWJzb2x1dGUYCSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wSAASDgoEbm9uZRgKIAEoCEgAQgkKB3RyaWdnZXIiEQoPQ2FsZW5kYXJSZXF1ZXN0Im8KEENhbGVuZGFyUmVzcG9uc2USKQoHc291cmNlcxgBIAMoCzIYLkNhbGVuZGFyUmVzcG9uc2UuU291cmNlGjAKBlNvdXJjZRIXCg9jYWxlbmRhcl9zZXJ2ZXIYASABKAkSDQoFbmFtZXMYAiADKAkiPgoNRXZlbnRzUmVxdWVzdBIbCghpbnRlcnZhbBgBIAEoCzIJLkludGVydmFsEhAKCHRpbWV6b25lGAIgASgJIksKDkV2ZW50c1Jlc3BvbnNlEhMKC2V2ZW50X25hbWVzGAEgAygJEgwKBHRhZ3MYAiADKAkSFgoGZXZlbnRzGAMgAygLMgYuRXZlbnQybQoPQ2FsZW5kYXJTZXJ2aWNlEi8KCENhbGVuZGFyEhAuQ2FsZW5kYXJSZXF1ZXN0GhEuQ2FsZW5kYXJSZXNwb25zZRIpCgZFdmVudHMSDi5FdmVudHNSZXF1ZXN0Gg8uRXZlbnRzUmVzcG9uc2ViBnByb3RvMw", [file_google_protobuf_timestamp, file_google_protobuf_duration]);
 
 /**
  * @generated from message Interval
@@ -216,38 +216,6 @@ export const EventsResponseSchema: GenMessage<EventsResponse> = /*@__PURE__*/
   messageDesc(file_v1_api, 5);
 
 /**
- * UpdateEvents
- *
- * @generated from message UpdateEventsRequest
- */
-export type UpdateEventsRequest = Message<"UpdateEventsRequest"> & {
-  /**
-   * @generated from field: string script = 1;
-   */
-  script: string;
-};
-
-/**
- * Describes the message UpdateEventsRequest.
- * Use `create(UpdateEventsRequestSchema)` to create a new message.
- */
-export const UpdateEventsRequestSchema: GenMessage<UpdateEventsRequest> = /*@__PURE__*/
-  messageDesc(file_v1_api, 6);
-
-/**
- * @generated from message UpdateEventsResponse
- */
-export type UpdateEventsResponse = Message<"UpdateEventsResponse"> & {
-};
-
-/**
- * Describes the message UpdateEventsResponse.
- * Use `create(UpdateEventsResponseSchema)` to create a new message.
- */
-export const UpdateEventsResponseSchema: GenMessage<UpdateEventsResponse> = /*@__PURE__*/
-  messageDesc(file_v1_api, 7);
-
-/**
  * @generated from service CalendarService
  */
 export const CalendarService: GenService<{
@@ -266,14 +234,6 @@ export const CalendarService: GenService<{
     methodKind: "unary";
     input: typeof EventsRequestSchema;
     output: typeof EventsResponseSchema;
-  },
-  /**
-   * @generated from rpc CalendarService.UpdateEvents
-   */
-  updateEvents: {
-    methodKind: "unary";
-    input: typeof UpdateEventsRequestSchema;
-    output: typeof UpdateEventsResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_v1_api, 0);

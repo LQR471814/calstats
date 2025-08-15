@@ -1,13 +1,11 @@
 package calendar
 
 import (
-	"calstats/internal/tel"
+	"calutils/internal/tel"
 	"context"
 	"crypto/tls"
-	"errors"
 	"fmt"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/emersion/go-ical"
@@ -15,7 +13,6 @@ import (
 	"github.com/emersion/go-webdav/caldav"
 	"github.com/teambition/rrule-go"
 	"github.com/zeebo/xxh3"
-	"golang.org/x/time/rate"
 )
 
 type eventId struct {
@@ -236,90 +233,6 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 	return out, nil
 }
 
-func (c Caldav) UpdateEvents(ctx context.Context, calendar Calendar, updates []UpdateEvent) (err error) {
-	urls, err := batchDo(ctx, updates, func(u UpdateEvent) (href string, err error) {
-		res, err := c.client.QueryCalendar(ctx, calendar.Id, &caldav.CalendarQuery{
-			CompFilter: caldav.CompFilter{
-				Name: ical.CompCalendar,
-				Comps: []caldav.CompFilter{{
-					Name: ical.CompEvent,
-					Props: []caldav.PropFilter{{
-						Name: ical.PropUID,
-						TextMatch: &caldav.TextMatch{
-							Text: u.Uid,
-						},
-					}},
-				}},
-			},
-			CompRequest: caldav.CalendarCompRequest{
-				Name: ical.CompCalendar,
-				Comps: []caldav.CalendarCompRequest{{
-					Name: ical.CompEvent,
-					Props: []string{
-						ical.PropURL,
-					},
-				}},
-			},
-		})
-		if err != nil {
-			return
-		}
-		if len(res) != 1 {
-			err = fmt.Errorf("invalid number of returned events (%d)", len(res))
-			return
-		}
-		events := res[0].Data.Events()
-		if len(events) != 1 {
-			err = fmt.Errorf("invalid number of returned events (%d)", len(res))
-			return
-		}
-		href = events[0].Props.Get(ical.PropURL).Value
-		return
-	})
-	if err != nil {
-		return
-	}
-
-	res, err := c.client.MultiGetCalendar(ctx, calendar.Id, &caldav.CalendarMultiGet{
-		Paths: urls,
-	})
-	if err != nil {
-		return
-	}
-
-	for _, eobj := range res {
-	}
-}
-
-func batchDo[I, O any](ctx context.Context, jobs []I, fn func(I) (O, error)) ([]O, error) {
-	limiter := rate.NewLimiter(1, 4)
-	wg := sync.WaitGroup{}
-	lock := sync.Mutex{}
-
-	var errs []error
-	outputs := make([]O, len(jobs))
-	for i, input := range jobs {
-		err := limiter.Wait(ctx)
-		if err != nil {
-			tel.Log.Warn("caldav", "rate limit error", "err", err)
-			continue
-		}
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			output, err := fn(input)
-
-			defer lock.Unlock()
-			lock.Lock()
-			outputs[i] = output
-			errs = append(errs, err)
-		}()
-	}
-
-	return outputs, errors.Join(errs...)
-}
-
 type caldavEvent struct {
 	Uid         string
 	Name        string
@@ -511,11 +424,11 @@ func (ce *caldavEvent) ParseRecurrence(e ical.Event, tz *time.Location, start, i
 			return
 		}
 
-		if ropts.Until == (time.Time{}) || ropts.Until.After(intvEnd) {
+		if ropts.Until.Equal(time.Time{}) || ropts.Until.After(intvEnd) {
 			ropts.Until = intvEnd
 		}
 		// set default dtstart to original event's starting time
-		if ropts.Dtstart == (time.Time{}) {
+		if ropts.Dtstart.Equal(time.Time{}) {
 			ropts.Dtstart = start
 		}
 

@@ -46,15 +46,8 @@ message EventsResponse {
   repeated Event events = 3;
 }
 
-// UpdateEvents
-message UpdateEventsRequest {
-  string script = 1;
-}
-message UpdateEventsResponse {}
-
 service CalendarService {
   rpc Calendar(CalendarRequest) returns (CalendarResponse);
   rpc Events(EventsRequest) returns (EventsResponse);
-  rpc UpdateEvents(UpdateEventsRequest) returns (UpdateEventsResponse);
 }
 
