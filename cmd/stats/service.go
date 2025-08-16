@@ -1,9 +1,9 @@
 package main
 
 import (
-	v1 "calutils/api/v1"
-	"calutils/internal/calendar"
-	"calutils/internal/config"
+	v1 "calstats/api/v1"
+	"calstats/internal/calendar"
+	"calstats/internal/config"
 	"context"
 	"encoding/json"
 	"fmt"

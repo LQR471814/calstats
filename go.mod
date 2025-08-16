@@ -1,4 +1,4 @@
-module calutils
+module calstats
 
 go 1.23.4
 
@@ -19,6 +19,7 @@ require (
 )
 
 require (
+	github.com/ainvaltin/nu-plugin v0.0.0-20250726091949-d237018ffe59 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
 	github.com/hujun-open/cobra v0.1.0 // indirect
 	github.com/hujun-open/extyaml v0.5.3 // indirect
@@ -27,6 +28,8 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
+	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

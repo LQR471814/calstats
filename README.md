@@ -1,4 +1,4 @@
-# calutils
+# calstats
 
 > Visualize how your time is spent.
 
@@ -25,7 +25,7 @@
 ## Usage
 
 ```sh
-./calutils --config <path/to/config.json5> serve
+./calstats --config <path/to/config.json5> serve
 ```
 
 ## Build

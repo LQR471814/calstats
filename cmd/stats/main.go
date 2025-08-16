@@ -1,10 +1,10 @@
 package main
 
 import (
-	"calutils/api/v1/v1connect"
-	"calutils/internal/calendar"
-	"calutils/internal/config"
-	"calutils/internal/tel"
+	"calstats/api/v1/v1connect"
+	"calstats/internal/calendar"
+	"calstats/internal/config"
+	"calstats/internal/tel"
 	"context"
 	"embed"
 	"flag"

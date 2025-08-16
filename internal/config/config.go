@@ -1,7 +1,7 @@
 package config
 
 import (
-	"calutils/internal/calendar"
+	"calstats/internal/calendar"
 )
 
 type Source struct {

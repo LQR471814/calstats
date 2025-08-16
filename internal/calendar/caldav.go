@@ -1,7 +1,7 @@
 package calendar
 
 import (
-	"calutils/internal/tel"
+	"calstats/internal/tel"
 	"context"
 	"crypto/tls"
 	"fmt"
