@@ -233,6 +233,11 @@ func (c Caldav) Events(ctx context.Context, calendar Calendar, intvStart, intvEn
 	return out, nil
 }
 
+func (c Caldav) Update(ctx context.Context, events []UpdateEvent) error {
+	// TODO: finish update
+	return nil
+}
+
 type caldavEvent struct {
 	Uid         string
 	Name        string

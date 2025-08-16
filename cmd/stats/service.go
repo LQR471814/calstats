@@ -3,6 +3,7 @@ package main
 import (
 	v1 "calutils/api/v1"
 	"calutils/internal/calendar"
+	"calutils/internal/config"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -18,7 +19,7 @@ import (
 type CalendarService struct {
 	mutex       sync.Mutex
 	eventLookup []eventRef
-	sources     []source
+	sources     []sourceConfig
 }
 
 type eventRef struct {
@@ -26,13 +27,12 @@ type eventRef struct {
 	uid uint64
 }
 
-type source struct {
+type sourceConfig struct {
 	calendar.Source
-	serverUrl string
-	calendars []string
+	cfg config.Source
 }
 
-func NewCalendarService(sources []source) *CalendarService {
+func NewCalendarService(sources []sourceConfig) *CalendarService {
 	return &CalendarService{
 		sources: sources,
 	}
@@ -56,12 +56,12 @@ func (s *CalendarService) Events(ctx context.Context, req *connect.Request[v1.Ev
 		}
 		var filtered []calendar.Calendar
 		for _, c := range cals {
-			if slices.Contains(source.calendars, c.Name) {
+			if slices.Contains(source.cfg.Calendars, c.Name) {
 				filtered = append(filtered, c)
 			}
 		}
 		if len(filtered) == 0 {
-			return nil, fmt.Errorf("find calendar: not found '%s'", source.calendars)
+			return nil, fmt.Errorf("find calendar: not found '%s'", source.cfg.Calendars)
 		}
 
 		tzId := req.Msg.Timezone
@@ -166,8 +166,8 @@ func (s *CalendarService) Calendar(ctx context.Context, req *connect.Request[v1.
 	sources := make([]*v1.CalendarResponse_Source, len(s.sources))
 	for i, s := range s.sources {
 		sources[i] = &v1.CalendarResponse_Source{
-			CalendarServer: s.serverUrl,
-			Names:          s.calendars,
+			CalendarServer: s.cfg.Server.Url,
+			Names:          s.cfg.Calendars,
 		}
 	}
 	return connect.NewResponse(&v1.CalendarResponse{
@@ -281,4 +281,3 @@ func prettyPrint(value any) string {
 	}
 	return string(expected)
 }
-

@@ -19,39 +19,39 @@ func TestLayerEvents(t *testing.T) {
 	table := []testCase{
 		{
 			input: []calendar.Event{
-				calendar.Event{Id: "1", Name: "A", Tags: nil, Start: datetime(9, 30), End: datetime(10, 0)},
-				calendar.Event{Id: "2", Name: "B", Tags: nil, Start: datetime(9, 30), End: datetime(9, 45)},
-				calendar.Event{Id: "3", Name: "C", Tags: nil, Start: datetime(9, 50), End: datetime(10, 0)},
+				{Id: 1, Name: "A", Tags: nil, Start: datetime(9, 30), End: datetime(10, 0)},
+				{Id: 2, Name: "B", Tags: nil, Start: datetime(9, 30), End: datetime(9, 45)},
+				{Id: 3, Name: "C", Tags: nil, Start: datetime(9, 50), End: datetime(10, 0)},
 			},
 			expect: []calendar.Event{
-				calendar.Event{Id: "1", Name: "B", Tags: nil, Start: datetime(9, 30), End: datetime(9, 45)},
-				calendar.Event{Id: "2", Name: "A", Tags: nil, Start: datetime(9, 45), End: datetime(9, 50)},
-				calendar.Event{Id: "3", Name: "C", Tags: nil, Start: datetime(9, 50), End: datetime(10, 0)},
+				{Id: 1, Name: "B", Tags: nil, Start: datetime(9, 30), End: datetime(9, 45)},
+				{Id: 2, Name: "A", Tags: nil, Start: datetime(9, 45), End: datetime(9, 50)},
+				{Id: 3, Name: "C", Tags: nil, Start: datetime(9, 50), End: datetime(10, 0)},
 			},
 		},
 		{
 			input: []calendar.Event{
-				calendar.Event{Id: "1", Name: "A", Tags: nil, Start: datetime(9, 0), End: datetime(9, 15)},
-				calendar.Event{Id: "2", Name: "B", Tags: nil, Start: datetime(9, 15), End: datetime(9, 30)},
-				calendar.Event{Id: "3", Name: "C", Tags: nil, Start: datetime(9, 30), End: datetime(9, 45)},
+				{Id: 1, Name: "A", Tags: nil, Start: datetime(9, 0), End: datetime(9, 15)},
+				{Id: 2, Name: "B", Tags: nil, Start: datetime(9, 15), End: datetime(9, 30)},
+				{Id: 3, Name: "C", Tags: nil, Start: datetime(9, 30), End: datetime(9, 45)},
 			},
 			expect: []calendar.Event{
-				calendar.Event{Id: "1", Name: "A", Tags: nil, Start: datetime(9, 0), End: datetime(9, 15)},
-				calendar.Event{Id: "2", Name: "B", Tags: nil, Start: datetime(9, 15), End: datetime(9, 30)},
-				calendar.Event{Id: "3", Name: "C", Tags: nil, Start: datetime(9, 30), End: datetime(9, 45)},
+				{Id: 1, Name: "A", Tags: nil, Start: datetime(9, 0), End: datetime(9, 15)},
+				{Id: 2, Name: "B", Tags: nil, Start: datetime(9, 15), End: datetime(9, 30)},
+				{Id: 3, Name: "C", Tags: nil, Start: datetime(9, 30), End: datetime(9, 45)},
 			},
 		},
 		{
 			input: []calendar.Event{
-				calendar.Event{Id: "1", Name: "A", Tags: nil, Start: datetime(9, 0), End: datetime(9, 15)},
-				calendar.Event{Id: "2", Name: "B", Tags: nil, Start: datetime(9, 15), End: datetime(9, 45)},
-				calendar.Event{Id: "3", Name: "C", Tags: nil, Start: datetime(9, 30), End: datetime(9, 40)},
+				{Id: 1, Name: "A", Tags: nil, Start: datetime(9, 0), End: datetime(9, 15)},
+				{Id: 2, Name: "B", Tags: nil, Start: datetime(9, 15), End: datetime(9, 45)},
+				{Id: 3, Name: "C", Tags: nil, Start: datetime(9, 30), End: datetime(9, 40)},
 			},
 			expect: []calendar.Event{
-				calendar.Event{Id: "1", Name: "A", Tags: nil, Start: datetime(9, 0), End: datetime(9, 15)},
-				calendar.Event{Id: "2", Name: "B", Tags: nil, Start: datetime(9, 15), End: datetime(9, 30)},
-				calendar.Event{Id: "3", Name: "C", Tags: nil, Start: datetime(9, 30), End: datetime(9, 40)},
-				calendar.Event{Id: "2", Name: "B", Tags: nil, Start: datetime(9, 40), End: datetime(9, 45)},
+				{Id: 1, Name: "A", Tags: nil, Start: datetime(9, 0), End: datetime(9, 15)},
+				{Id: 2, Name: "B", Tags: nil, Start: datetime(9, 15), End: datetime(9, 30)},
+				{Id: 3, Name: "C", Tags: nil, Start: datetime(9, 30), End: datetime(9, 40)},
+				{Id: 2, Name: "B", Tags: nil, Start: datetime(9, 40), End: datetime(9, 45)},
 			},
 		},
 	}
